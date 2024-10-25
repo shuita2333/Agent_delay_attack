@@ -149,7 +149,7 @@ class TargetLM():
             self.model = preloaded_model
             _, self.template = get_model_path_and_template(model_name)
 
-    def get_response(self, prompts_list):
+    def get_response(self, prompts_list,target_identity):
         batchsize = len(prompts_list)
         convs_list = [common.conv_template(self.template) for _ in range(batchsize)]
         full_prompts = []
@@ -162,6 +162,7 @@ class TargetLM():
                 full_prompts.append(conv.messages[-1][1])
             else:
                 conv.append_message(conv.roles[1], None)
+                conv.append_message(conv.system_message,target_identity)
                 full_prompts.append(conv.get_prompt())
 
         outputs_list = self.model.batched_generate(full_prompts,
