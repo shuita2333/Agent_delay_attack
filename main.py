@@ -1,6 +1,8 @@
 import argparse
+
 from system_prompts import get_attacker_system_prompt,get_target_identity
 from loggers import WandBLogger
+
 from judges import load_judge
 from conversers import load_attack_and_target_models
 from common import process_target_response, get_init_msg, conv_template
@@ -15,7 +17,7 @@ def main(args):
 
     judgeLM = load_judge(args)
 
-    # logger = WandBLogger(args, system_prompt)
+    logger = AttackLogger(args, system_prompt)
 
     # 初始化对话
     batchsize = args.n_streams
@@ -60,10 +62,10 @@ def main(args):
                 f"{i + 1}/{batchsize}\n\n[IMPROVEMENT]:\n{improv} \n\n[PROMPT]:\n{prompt} \n\n[RESPONSE]:\n{response}\n\n[SCORE/LENGTH]:\n{score}\t{length}\n\n")
 
         # # WandB log values
-        # logger.log(iteration,
-        #            extracted_attack_list,
-        #            target_response_list,
-        #            judge_scores)
+        logger.log(iteration,
+                   extracted_attack_list,
+                   target_response_list,
+                   judge_scores)
 
         # 截断对话以避免上下文长度问题
         for i, conv in enumerate(convs_list):
