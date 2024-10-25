@@ -62,6 +62,7 @@ def main(args):
         logger.log(iteration,
                    extracted_attack_list,
                    target_response_list,
+                   target_response_length,
                    judge_scores)
 
         # 截断对话以避免上下文长度问题

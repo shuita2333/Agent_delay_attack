@@ -54,9 +54,11 @@ class AttackLogger:
                          n_streams=args.n_streams,
                          )
 
-    def log(self, iteration: int, attack_list: list, response_list: list, judge_scores: list):
+    def log(self, iteration: int, attack_list: list, response_list: list, target_response_length: list,
+            judge_scores: list):
         self.logger.info("attack log",
                          Desciption=f"iteration:{iteration}",
                          attack_list=attack_list,
                          response_list=response_list,
+                         response_length=target_response_length,
                          judge_scores=judge_scores)
