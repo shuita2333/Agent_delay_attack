@@ -1,5 +1,5 @@
 import argparse
-from system_prompts import get_attacker_system_prompt
+from system_prompts import get_attacker_system_prompt,get_target_identity
 from loggers import WandBLogger
 from judges import load_judge
 from conversers import load_attack_and_target_models
@@ -45,7 +45,8 @@ def main(args):
         improv_list = [attack["improvement"] for attack in extracted_attack_list]
 
         # 获得目标响应
-        target_response_list, target_response_length = targetLM.get_response(adv_prompt_list)
+        target_identity=get_target_identity(args.goal)
+        target_response_list, target_response_length = targetLM.get_response(adv_prompt_list,target_identity)
         print("Finished getting target responses.")
 
         # 获取裁判分数
@@ -53,10 +54,10 @@ def main(args):
         print("Finished getting judge scores.")
 
         # Print prompts, responses, and scores
-        for i, (prompt, improv, response, score) in enumerate(
-                zip(adv_prompt_list, improv_list, target_response_list, judge_scores)):
+        for i, (prompt, improv, response, score,length) in enumerate(
+                zip(adv_prompt_list, improv_list, target_response_list, judge_scores,target_response_length)):
             print(
-                f"{i + 1}/{batchsize}\n\n[IMPROVEMENT]:\n{improv} \n\n[PROMPT]:\n{prompt} \n\n[RESPONSE]:\n{response}\n\n[SCORE]:\n{score}\n\n")
+                f"{i + 1}/{batchsize}\n\n[IMPROVEMENT]:\n{improv} \n\n[PROMPT]:\n{prompt} \n\n[RESPONSE]:\n{response}\n\n[SCORE/LENGTH]:\n{score}\t{length}\n\n")
 
         # # WandB log values
         # logger.log(iteration,
