@@ -95,10 +95,10 @@ def my_extract_json(s):
     # 解析嵌套的JSON字符串
     json_str = re.sub(r'[\x00-\x1F\x7F]', '', json_str)
     if json_str.endswith('"'):
-        return json_str + '}'
+        json_str += '}'
     # 如果字符串不是以 "或 }结尾，添加 "}
     elif not json_str.endswith('}'):
-        return json_str + '"}'
+        json_str += '"}'
     nested_json = json.loads(json_str)
 
     # 提取improvement和prompt字段
