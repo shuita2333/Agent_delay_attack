@@ -1,10 +1,13 @@
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
-
+import re
 from config import VICUNA_PATH, LLAMA_PATH, ATTACK_TEMP, TARGET_TEMP, ATTACK_TOP_P, TARGET_TOP_P
 import common
 from language_models import GPT, Siliconflow
 import json
+
+from system_prompts import get_subtask_attacker_system_prompt, get_target_identity
+
 
 def load_attack_and_target_models(args):
     '''
@@ -124,6 +127,64 @@ class AttackLM():
             print(f"Failed to generate output after {self.max_n_attack_attempts} attempts. Terminating.")
         return valid_outputs
 
+    def get_integrate_attack(self, conv, prompt):
+        conv.append_message(conv.roles[0], prompt)
+        full_prompts = []
+        if "gpt" in self.model_name:
+            full_prompts.append(conv.to_openai_api_messages())
+        else:
+            # conv.append_message(conv.roles[1], init_message)
+            # full_prompts.append(conv.get_prompt()[:-len(conv.sep2)])
+            full_prompts.append(conv.get_prompt()[:-len(conv.sep)])
+
+        outputs_list = self.model.batched_generate(full_prompts,
+                                                   max_n_tokens=self.max_n_tokens,
+                                                   temperature=self.temperature,
+                                                   top_p=self.top_p
+                                                   )
+
+        outputs = outputs_list[0]
+        if "Qwen" in self.model_name:
+            prompt = common.extract_integrate_json(outputs)
+
+        return prompt
+
+    def get_background(self, convs_list, prompts_list):
+        assert len(convs_list) == len(prompts_list), "Mismatch between number of conversations and prompts."
+
+        batchsize = len(convs_list)
+        indices_to_regenerate = list(range(batchsize))
+        valid_outputs = [None] * batchsize
+
+        full_prompts = []
+        request_prompt = []
+        length_lest = []
+        # 向对话添加提示和初始播种消息（仅一次）
+        for conv, prompt in zip(convs_list, prompts_list):
+            conv.append_message(conv.roles[0], prompt)
+            # Get prompts(需要根据模型修改)
+            if "gpt" in self.model_name:
+                full_prompts.append(conv.to_openai_api_messages())
+            else:
+                full_prompts.append(conv.get_prompt()[:-len(conv.sep)])
+
+        # 基于索引重新生成会话子集
+        full_prompts_subset = [full_prompts[i] for i in indices_to_regenerate]
+
+        # 生成输出
+        outputs_list = self.model.batched_generate(full_prompts_subset,
+                                                   max_n_tokens=self.max_n_tokens,
+                                                   temperature=self.temperature,
+                                                   top_p=self.top_p
+                                                   )
+
+        # 检查有效的输出并更新列表
+        for full_output in outputs_list:
+            output, length = siliconCloud_outputs_list_extracted(full_output)
+            request_prompt.append(output)
+            length_lest.extend([length])
+        return request_prompt, length_lest
+
 
 class TargetLM():
     """
@@ -149,7 +210,7 @@ class TargetLM():
             self.model = preloaded_model
             _, self.template = get_model_path_and_template(model_name)
 
-    def get_response(self, prompts_list,target_identity):
+    def get_response(self, prompts_list, target_identity):
         batchsize = len(prompts_list)
         convs_list = [common.conv_template(self.template) for _ in range(batchsize)]
         full_prompts = []
@@ -162,7 +223,7 @@ class TargetLM():
                 full_prompts.append(conv.messages[-1][1])
             else:
                 conv.append_message(conv.roles[1], None)
-                conv.append_message(conv.system_message,target_identity)
+                conv.append_message(conv.system_message, target_identity)
                 full_prompts.append(conv.get_prompt())
         outputs_list = self.model.batched_generate(full_prompts,
                                                    max_n_tokens=self.max_n_tokens,
@@ -170,7 +231,8 @@ class TargetLM():
                                                    top_p=self.top_p
                                                    )
 
-        outputs=[]
+        outputs = []
+
         outputs_length = []
         if "Qwen" in self.model_name:
             for output in outputs_list:
@@ -178,7 +240,8 @@ class TargetLM():
                 output, length = siliconCloud_outputs_list_extracted(output)
                 outputs_length.append(length)
                 outputs.append(output)
-        return outputs,outputs_length
+        return outputs, outputs_length
+
 
 def siliconCloud_outputs_list_extracted(outputs_list):
     # 将JSON数据加载为字典
@@ -187,14 +250,96 @@ def siliconCloud_outputs_list_extracted(outputs_list):
     # 提取choices列表中的第一个元素的message内容
     message = None
     completion_tokens = None
+    prompt_content = None
+
     if 'choices' in data and len(data['choices']) > 0:
         message = data['choices'][0]['message']['content']
+
+        # 使用正则表达式提取 "prompt" 的内容
+        match = re.search(r'"prompt":\s*"(.+?)"', message, re.DOTALL)
+        if match:
+            prompt_content = match.group(1)
 
     # 提取completion_tokens的值
     if 'usage' in data and 'completion_tokens' in data['usage']:
         completion_tokens = data['usage']['completion_tokens']
 
-    return message, completion_tokens
+    return prompt_content, completion_tokens
+
+
+def subtask_generate(args, extracted_integrate_attack_prompt, attackLM, targetLM):
+    subtask_prompt_list = []
+    # #下一步通过总任务的prompt生成子任务
+    batchsize = args.n_question
+    subtask_list = [common.get_subtask_init_msg(extracted_integrate_attack_prompt["total_prompt"], prompt) for prompt in
+                    extracted_integrate_attack_prompt["subtask_question"]]
+    convs_list = [common.conv_template(attackLM.template) for _ in range(batchsize)]
+    subtask_system_prompt = get_subtask_attacker_system_prompt(args.function_descript, args.target_length,
+                                                               extracted_integrate_attack_prompt["total_prompt"])
+
+    for conv in convs_list:
+        ## 这里替换系统提示内容
+        conv.set_system_message(subtask_system_prompt)
+
+    if args.n_iterations == 1:
+        print(f"""\n{'=' * 36}\nIteration: 1\n{'=' * 36}\n""")
+
+        # 获得对抗性 prompt 和改进
+        extracted_attack_list = attackLM.get_attack(convs_list, subtask_list)
+        print("Finished getting adversarial prompts.")
+
+        # 提取 prompt 和改进
+        adv_prompt_list = [attack["prompt"] for attack in extracted_attack_list]
+
+        subtask_prompt_list = adv_prompt_list
+
+
+    elif args.n_iterations == 2:
+        last_adv_prompt_list = []
+        last_target_response_list = []
+        last_target_response_length = []
+
+        for iteration in range(1, args.n_iterations + 1):
+            print(f"""\n{'=' * 36}\nIteration: {iteration}\n{'=' * 36}\n""")
+            if iteration > 1:
+                subtask_list = [
+                    common.subtask_process_target_response(adv_prompt, target_response,
+                                                           extracted_integrate_attack_prompt["total_prompt"], prompt,
+                                                           length) for
+                    adv_prompt, target_response, length, prompt in
+                    zip(last_adv_prompt_list, last_target_response_list, last_target_response_length,
+                        extracted_integrate_attack_prompt["subtask_question"])]
+
+            # 获得对抗性 prompt 和改进
+            extracted_attack_list = attackLM.get_attack(convs_list, subtask_list)
+            print("Finished getting adversarial prompts.")
+
+            # 提取 prompt 和改进
+            adv_prompt_list = [attack["prompt"] for attack in extracted_attack_list]
+            improv_list = [attack["improvement"] for attack in extracted_attack_list]
+
+            # 获得目标响应
+            target_identity = get_target_identity(args.function_descript)
+            target_response_list, target_response_length = targetLM.get_response(adv_prompt_list, target_identity)
+            print(f"Finished getting target responses.\ntarget_response_length: {target_response_length}")
+
+            if iteration == 1:
+                last_adv_prompt_list = adv_prompt_list
+                last_target_response_list = target_response_list
+                last_target_response_length = target_response_length
+
+            if iteration == args.n_iterations:
+                for i in range(len(target_response_length)):
+                    # 比较两个length列表中的对应值
+                    if target_response_length[i] >= last_target_response_length[i]:
+                        # 如果 target_response_length 的值较大或相等，存入 adv_prompt_list 中的对应元素
+                        subtask_prompt_list.append(adv_prompt_list[i])
+                    else:
+                        # 如果 last_target_response_length 的值较大，存入 last_adv_prompt_list 中的对应元素
+                        subtask_prompt_list.append(last_adv_prompt_list[i])
+
+    return subtask_prompt_list
+
 
 def load_indiv_model(model_name):
     '''
