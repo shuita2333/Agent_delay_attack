@@ -13,7 +13,7 @@ class CustomJSONRenderer:
 
 
 class AttackLogger:
-    def __init__(self, args, system_prompt, ):
+    def __init__(self, args,):
         # 创建日志文件名
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         log_filename = f'./log/{timestamp}.log'
@@ -44,7 +44,15 @@ class AttackLogger:
                          Desciption="Model Args",
                          attack_model=args.attack_model,
                          target_model=args.target_model,
-                         model_function_descript=args.function_descript,
+# <<<<<<< zw
+#                          judge_model=args.judge_model,
+#                          keep_last_n=args.keep_last_n,
+#                          index=args.index,
+#                          category=args.category,
+#                          goal=args.goal,
+# =======
+#                          model_function_descript=args.function_descript,
+# >>>>>>> master
                          n_iter=args.n_iterations,
                          n_subtesk=args.n_question,
                          )
@@ -56,12 +64,12 @@ class AttackLogger:
     #                      response_list=response_list,
     #                      judge_scores=judge_scores,
     #                      target_response_length=target_response_length)
-    def log(self, iteration: int, attack_list: list, response_list: list, target_response_length: list):
-        self.logger.info(event="attack log",
+
+    def log(self, iteration: int, **kwargs):
+        self.logger.info("attack log",
                          Desciption=f"iteration:{iteration}",
-                         attack_list=attack_list,
-                         response_list=response_list,
-                         target_response_length=target_response_length)
+                         **kwargs)
+
 
     def integrate_log(self, integrate, n_question):
         subtask_questions = {}
@@ -96,3 +104,4 @@ class AttackLogger:
                          general_assignment=general_assignment,
                          general_assignment_length=len(general_assignment)
                          )
+
