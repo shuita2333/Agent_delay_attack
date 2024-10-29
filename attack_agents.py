@@ -83,19 +83,21 @@ class AgentLM(ABC):
 
             # 检查有效的输出并更新列表
             new_indices_to_regenerate = []
-            for i, full_output in enumerate(outputs_list):
-                orig_index = indices_to_regenerate[i]
-                # if "gpt" not in self.model_name:
-                #     full_output = init_message + full_output
-                print(full_output)
-                attack_dict, json_str = self._extract_json(full_output)
+            try:
+                for i, full_output in enumerate(outputs_list):
+                    orig_index = indices_to_regenerate[i]
+                    # if "gpt" not in self.model_name:
+                    #     full_output = init_message + full_output
+                    print(full_output)
+                    attack_dict, json_str = self._extract_json(full_output)
 
-                if attack_dict is not None:
-                    valid_outputs[orig_index] = attack_dict
-                    convs_list[orig_index].append_message(convs_list[orig_index].roles[1], json_str)  # 使用有效生成更新对话
-                else:
-                    new_indices_to_regenerate.append(orig_index)
-
+                    if attack_dict is not None:
+                        valid_outputs[orig_index] = attack_dict
+                        convs_list[orig_index].append_message(convs_list[orig_index].roles[1], json_str)  # 使用有效生成更新对话
+                    else:
+                        new_indices_to_regenerate.append(orig_index)
+            except JSONDecodeError:
+                continue
             # 更新索引以为下一次迭代重新生成索引
             indices_to_regenerate = new_indices_to_regenerate
 

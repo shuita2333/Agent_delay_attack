@@ -13,7 +13,7 @@ class CustomJSONRenderer:
 
 
 class AttackLogger:
-    def __init__(self, args, ):
+    def __init__(self):
         # 创建日志文件名
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         log_filename = f'./log/{timestamp}.log'
