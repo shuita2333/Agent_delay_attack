@@ -44,14 +44,9 @@ class AttackLogger:
                          Desciption="Model Args",
                          attack_model=args.attack_model,
                          target_model=args.target_model,
-                         judge_model=args.judge_model,
-                         keep_last_n=args.keep_last_n,
-                         system_prompt=system_prompt,
-                         index=args.index,
-                         category=args.category,
-                         goal=args.goal,
+                         model_function_descript=args.function_descript,
                          n_iter=args.n_iterations,
-                         n_streams=args.n_streams,
+                         n_subtesk=args.n_question,
                          )
 
     # def log(self, iteration: int, attack_list: list, response_list: list, judge_scores: list,target_response_length: list):
@@ -62,8 +57,42 @@ class AttackLogger:
     #                      judge_scores=judge_scores,
     #                      target_response_length=target_response_length)
     def log(self, iteration: int, attack_list: list, response_list: list, target_response_length: list):
-        self.logger.info("attack log",
+        self.logger.info(event="attack log",
                          Desciption=f"iteration:{iteration}",
                          attack_list=attack_list,
                          response_list=response_list,
                          target_response_length=target_response_length)
+
+    def integrate_log(self, integrate, n_question):
+        subtask_questions = {}
+        for i, question in enumerate(integrate["subtask_question"], start=1):
+            subtask_questions[f"subtask_question{i}"] = question
+
+        self.logger.info(event="integrate_system_prompt",
+                         Desciption="The problem framework is built, a broad topic is generated, and sub-questions "
+                                    "are generated according to the topic.",
+                         n_question=n_question,
+                         total_task_prompt=integrate["total_prompt"],
+                         **subtask_questions)
+
+    def subtask_log(self, n_iterations, subtask_prompt_list):
+        subtask_prompt = {}
+        for i, question in enumerate(subtask_prompt_list, start=1):
+            subtask_prompt[f"subtask_prompt{i}"] = question
+        self.logger.info(event="subtask_log",
+                         Desciption="A subproblem that causes the target model to extend the output",
+                         n_iterations=n_iterations,
+                         **subtask_prompt
+                         )
+
+    def background_log(self, subtask_prompt_list,general_assignment,length_lest):
+        subtask_prompt = {}
+        for i, question in enumerate(subtask_prompt_list, start=1):
+            subtask_prompt[f"background_prompt{i}"] = question
+        self.logger.info(event="background_log",
+                         Desciption="Write an extended backstory to the problem",
+                         **subtask_prompt,
+                         ooutput_length=length_lest,
+                         general_assignment=general_assignment,
+                         general_assignment_length=len(general_assignment)
+                         )
