@@ -6,6 +6,11 @@ from fastchat.model import (
 import re
 
 def load_judge(args):
+    '''
+    评价模型加载
+    :param args:
+    :return:
+    '''
     if "gpt" in args.judge_model:
         return GPTJudge(args)
     elif args.judge_model == "no-judge":

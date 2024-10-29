@@ -142,6 +142,14 @@ class Siliconflow():
                          max_n_tokens: int,
                          temperature: float,
                          top_p: float = 1.0, ):
+        '''
+        模型调用规范接口
+        :param convs_list:
+        :param max_n_tokens:
+        :param temperature:
+        :param top_p:
+        :return:
+        '''
         return [self._call(conv, max_n_tokens, temperature, top_p) for conv in convs_list]
 
     def siliconflow_completions(self,
@@ -149,6 +157,14 @@ class Siliconflow():
                                 max_n_tokens: int,
                                 temperature: float,
                                 top_p: float) -> str:
+        '''
+        api 调用指令
+        :param prompt:
+        :param max_n_tokens:
+        :param temperature:
+        :param top_p:
+        :return:
+        '''
         payload = {
             "model": self.model_name,
             "messages": [{"role": "user", "content": prompt}],
@@ -176,114 +192,3 @@ class Siliconflow():
         #     response = enforce_stop_tokens(response, stop)
         return response
 
-#
-# class Claude():
-#     API_RETRY_SLEEP = 10
-#     API_ERROR_OUTPUT = "$ERROR$"
-#     API_QUERY_SLEEP = 1
-#     API_MAX_RETRY = 5
-#     API_TIMEOUT = 20
-#     API_KEY = os.getenv("ANTHROPIC_API_KEY")
-#
-#     def __init__(self, model_name) -> None:
-#         self.model_name = model_name
-#         self.model= anthropic.Anthropic(
-#             api_key=self.API_KEY,
-#             )
-#
-#     def generate(self, conv: List,
-#                 max_n_tokens: int,
-#                 temperature: float,
-#                 top_p: float):
-#         '''
-#         Args:
-#             conv: List of conversations
-#             max_n_tokens: int, max number of tokens to generate
-#             temperature: float, temperature for sampling
-#             top_p: float, top p for sampling
-#         Returns:
-#             str: generated response
-#         '''
-#         output = self.API_ERROR_OUTPUT
-#         for _ in range(self.API_MAX_RETRY):
-#             try:
-#                 completion = self.model.completions.create(
-#                     model=self.model_name,
-#                     max_tokens_to_sample=max_n_tokens,
-#                     prompt=conv,
-#                     temperature=temperature,
-#                     top_p=top_p
-#                 )
-#                 output = completion.completion
-#                 break
-#             except anthropic.APIError as e:
-#                 print(type(e), e)
-#                 time.sleep(self.API_RETRY_SLEEP)
-#
-#             time.sleep(self.API_QUERY_SLEEP)
-#         return output
-#
-#     def batched_generate(self,
-#                         convs_list: List[List[Dict]],
-#                         max_n_tokens: int,
-#                         temperature: float,
-#                         top_p: float = 1.0,):
-#         return [self.generate(conv, max_n_tokens, temperature, top_p) for conv in convs_list]
-#
-# class PaLM():
-#     API_RETRY_SLEEP = 10
-#     API_ERROR_OUTPUT = "$ERROR$"
-#     API_QUERY_SLEEP = 1
-#     API_MAX_RETRY = 5
-#     API_TIMEOUT = 20
-#     default_output = "I'm sorry, but I cannot assist with that request."
-#     API_KEY = os.getenv("PALM_API_KEY")
-#
-#     def __init__(self, model_name) -> None:
-#         self.model_name = model_name
-#         palm.configure(api_key=self.API_KEY)
-#
-#     def generate(self, conv: List,
-#                 max_n_tokens: int,
-#                 temperature: float,
-#                 top_p: float):
-#         '''
-#         Args:
-#             conv: List of dictionaries,
-#             max_n_tokens: int, max number of tokens to generate
-#             temperature: float, temperature for sampling
-#             top_p: float, top p for sampling
-#         Returns:
-#             str: generated response
-#         '''
-#         output = self.API_ERROR_OUTPUT
-#         for _ in range(self.API_MAX_RETRY):
-#             try:
-#                 completion = palm.chat(
-#                     messages=conv,
-#                     temperature=temperature,
-#                     top_p=top_p
-#                 )
-#                 output = completion.last
-#
-#                 if output is None:
-#                     # If PaLM refuses to output and returns None, we replace it with a default output
-#                     output = self.default_output
-#                 else:
-#                     # Use this approximation since PaLM does not allow
-#                     # to specify max_tokens. Each token is approximately 4 characters.
-#                     output = output[:(max_n_tokens*4)]
-#                 break
-#             except Exception as e:
-#                 print(type(e), e)
-#                 time.sleep(self.API_RETRY_SLEEP)
-#
-#             time.sleep(1)
-#         return output
-#
-#     def batched_generate(self,
-#                         convs_list: List[List[Dict]],
-#                         max_n_tokens: int,
-#                         temperature: float,
-#                         top_p: float = 1.0,):
-#         return [self.generate(conv, max_n_tokens, temperature, top_p) for conv in convs_list]

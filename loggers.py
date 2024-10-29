@@ -13,7 +13,7 @@ class CustomJSONRenderer:
 
 
 class AttackLogger:
-    def __init__(self, args,):
+    def __init__(self, args, ):
         # 创建日志文件名
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         log_filename = f'./log/{timestamp}.log'
@@ -40,38 +40,33 @@ class AttackLogger:
         # 创建一个 logger
         self.logger = structlog.get_logger()
 
-        self.logger.info("init",
-                         Desciption="Model Args",
-                         attack_model=args.attack_model,
-                         target_model=args.target_model,
-# <<<<<<< zw
-#                          judge_model=args.judge_model,
-#                          keep_last_n=args.keep_last_n,
-#                          index=args.index,
-#                          category=args.category,
-#                          goal=args.goal,
-# =======
-#                          model_function_descript=args.function_descript,
-# >>>>>>> master
-                         n_iter=args.n_iterations,
-                         n_subtesk=args.n_question,
-                         )
-
-    # def log(self, iteration: int, attack_list: list, response_list: list, judge_scores: list,target_response_length: list):
-    #     self.logger.info("attack log",
-    #                      Desciption=f"iteration:{iteration}",
-    #                      attack_list=attack_list,
-    #                      response_list=response_list,
-    #                      judge_scores=judge_scores,
-    #                      target_response_length=target_response_length)
-
     def log(self, iteration: int, **kwargs):
         self.logger.info("attack log",
                          Desciption=f"iteration:{iteration}",
                          **kwargs)
 
+    def subproblems_optimize_initial(self, args):
+        '''
+        拆分子问题优化法 初始信息日志记录
+        :param args:
+        :return:
+        '''
+        self.logger.info("init",
+                         Desciption="Model Args",
+                         attack_model=args.attack_model,
+                         target_model=args.target_model,
+                         model_function_descript=args.function_descript,
+                         n_iter=args.n_iterations,
+                         n_subtesk=args.n_question,
+                         )
 
     def integrate_log(self, integrate, n_question):
+        '''
+        拆分子问题优化法 总任务目标记录
+        :param integrate:
+        :param n_question:
+        :return:
+        '''
         subtask_questions = {}
         for i, question in enumerate(integrate["subtask_question"], start=1):
             subtask_questions[f"subtask_question{i}"] = question
@@ -84,6 +79,12 @@ class AttackLogger:
                          **subtask_questions)
 
     def subtask_log(self, n_iterations, subtask_prompt_list):
+        '''
+        拆分子问题优化法 子问题生成日志记录
+        :param n_iterations:
+        :param subtask_prompt_list:
+        :return:
+        '''
         subtask_prompt = {}
         for i, question in enumerate(subtask_prompt_list, start=1):
             subtask_prompt[f"subtask_prompt{i}"] = question
@@ -93,7 +94,14 @@ class AttackLogger:
                          **subtask_prompt
                          )
 
-    def background_log(self, subtask_prompt_list,general_assignment,length_lest):
+    def background_log(self, subtask_prompt_list, general_assignment, length_lest):
+        '''
+        拆分子问题优化法 子问题添加背景延长及 总问题prompt 日志记录
+        :param subtask_prompt_list:
+        :param general_assignment:
+        :param length_lest:
+        :return:
+        '''
         subtask_prompt = {}
         for i, question in enumerate(subtask_prompt_list, start=1):
             subtask_prompt[f"background_prompt{i}"] = question
@@ -104,4 +112,3 @@ class AttackLogger:
                          general_assignment=general_assignment,
                          general_assignment_length=len(general_assignment)
                          )
-

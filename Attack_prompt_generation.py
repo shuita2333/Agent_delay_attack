@@ -1,12 +1,10 @@
 import argparse
 
-from system_prompts import get_attacker_system_prompt, get_target_identity, get_integrate_attacker_system_prompt, \
-    get_integrate_prompt, get_subtask_attacker_system_prompt, get_background_system_prompt, general_assignment_generate
+from system_prompts import get_integrate_attacker_system_prompt, \
+    get_integrate_prompt, get_background_system_prompt, general_assignment_generate
 
-from judges import load_judge
 from conversers import load_attack_and_target_models, subtask_generate
-from common import process_target_response, get_init_msg, conv_template, get_subtask_init_msg, \
-    subtask_process_target_response, get_background_init_msg
+from common import conv_template,  get_background_init_msg
 from loggers import AttackLogger
 
 
@@ -17,7 +15,8 @@ def main(args):
     attackLM, targetLM = load_attack_and_target_models(args)
 
     # 初始化日志
-    logger = AttackLogger(args, integrate_system_prompt)
+    logger = AttackLogger()
+    logger.subproblems_optimize_initial(args)
 
     # 初始化对话
     integrate_convs = conv_template(attackLM.template)

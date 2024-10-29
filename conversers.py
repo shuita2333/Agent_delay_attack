@@ -128,6 +128,12 @@ class AttackLM():
         return valid_outputs
 
     def get_integrate_attack(self, conv, prompt):
+        '''
+        拆分子问题优化法 攻击模型获取总任务目标
+        :param conv:
+        :param prompt:
+        :return:
+        '''
         conv.append_message(conv.roles[0], prompt)
         full_prompts = []
         if "gpt" in self.model_name:
@@ -150,6 +156,12 @@ class AttackLM():
         return prompt
 
     def get_background(self, convs_list, prompts_list):
+        '''
+        拆分子问题优化法 攻击模型为子任务描述添加长文本背景
+        :param convs_list:
+        :param prompts_list:
+        :return:
+        '''
         assert len(convs_list) == len(prompts_list), "Mismatch between number of conversations and prompts."
 
         batchsize = len(convs_list)
@@ -211,6 +223,12 @@ class TargetLM():
             _, self.template = get_model_path_and_template(model_name)
 
     def get_response(self, prompts_list, target_identity):
+        '''
+        迭代优化过程中，目标模型生成长文本内容
+        :param prompts_list:
+        :param target_identity:
+        :return:
+        '''
         batchsize = len(prompts_list)
         convs_list = [common.conv_template(self.template) for _ in range(batchsize)]
         full_prompts = []
@@ -244,6 +262,11 @@ class TargetLM():
 
 
 def siliconCloud_outputs_list_extracted(outputs_list):
+    '''
+    siliconCloud 接口调用中拆解出prompt回复
+    :param outputs_list:
+    :return:
+    '''
     # 将JSON数据加载为字典
     data = json.loads(outputs_list)
 
@@ -268,6 +291,14 @@ def siliconCloud_outputs_list_extracted(outputs_list):
 
 
 def subtask_generate(args, extracted_integrate_attack_prompt, attackLM, targetLM):
+    '''
+    拆分子问题优化法   子问题生成 模块封装
+    :param args:
+    :param extracted_integrate_attack_prompt:
+    :param attackLM:
+    :param targetLM:
+    :return:
+    '''
     subtask_prompt_list = []
     # #下一步通过总任务的prompt生成子任务
     batchsize = args.n_question
