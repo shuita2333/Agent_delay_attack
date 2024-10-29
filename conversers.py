@@ -229,8 +229,9 @@ class TargetLM():
         :param target_identity:
         :return:
         '''
-        batchsize = len(prompts_list)
-        convs_list = [common.conv_template(self.template) for _ in range(batchsize)]
+        # batchsize = len(prompts_list)
+        # convs_list = [common.conv_template(self.template) for _ in range(batchsize)]
+        convs_list = target_identity
         full_prompts = []
         for conv, prompt in zip(convs_list, prompts_list):
             conv.append_message(conv.roles[0], prompt)
@@ -240,9 +241,10 @@ class TargetLM():
             elif "palm" in self.model_name:
                 full_prompts.append(conv.messages[-1][1])
             else:
-                conv.append_message(conv.roles[1], None)
-                conv.append_message(conv.system_message, target_identity)
-                full_prompts.append(conv.get_prompt())
+                # conv.append_message(conv.roles[1], None)
+                # conv.append_message(conv.system_message, target_identity)
+                # full_prompts.append(conv.get_prompt())
+                full_prompts.append(conv.get_prompt()[:-len(conv.sep)])
         outputs_list = self.model.batched_generate(full_prompts,
                                                    max_n_tokens=self.max_n_tokens,
                                                    temperature=self.temperature,
@@ -254,8 +256,7 @@ class TargetLM():
         outputs_length = []
         if "Qwen" in self.model_name:
             for output in outputs_list:
-                print(output)
-                output, length = siliconCloud_outputs_list_extracted(output)
+                output, length = siliconCloud_outputs_single_list_extracted(output)
                 outputs_length.append(length)
                 outputs.append(output)
         return outputs, outputs_length
@@ -288,6 +289,31 @@ def siliconCloud_outputs_list_extracted(outputs_list):
         completion_tokens = data['usage']['completion_tokens']
 
     return prompt_content, completion_tokens
+
+
+def siliconCloud_outputs_single_list_extracted(outputs_list):
+    '''
+    siliconCloud 接口调用中拆解出单一参数回复内容
+    :param outputs_list:
+    :return:
+    '''
+    # 将JSON数据加载为字典
+    data = json.loads(outputs_list)
+
+    # 提取choices列表中的第一个元素的message内容
+    message = None
+    completion_tokens = None
+
+    if 'choices' in data and len(data['choices']) > 0:
+        message = data['choices'][0]['message']['content']
+
+
+
+    # 提取completion_tokens的值
+    if 'usage' in data and 'completion_tokens' in data['usage']:
+        completion_tokens = data['usage']['completion_tokens']
+
+    return message, completion_tokens
 
 
 def subtask_generate(args, extracted_integrate_attack_prompt, attackLM, targetLM):
