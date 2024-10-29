@@ -36,6 +36,14 @@ def main(args):
     subtask_prompt_list = subtask_generate(args, extracted_integrate_attack_prompt, attackLM, targetLM)
     print("子任务已生成")
 
+    ### 测试用例，测试不添加背景生成内容长度  ###
+    general_assignment = general_assignment_generate(extracted_integrate_attack_prompt["total_prompt"],
+                                                     subtask_prompt_list)
+    logger.background_log(subtask_prompt_list,general_assignment,[0,0,0,0,0,0])
+    ### 测试用例，测试不添加背景生成内容长度  ###
+
+
+
     logger.subtask_log(args.n_iterations, subtask_prompt_list)
 
     # 延长问题语句输出
@@ -137,7 +145,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--n-question",
         type=int,
-        default=10,
+        default=8,
         help="子问题数 Number of concurrent jailbreak conversations. If this is too large, then there may be out of memory errors."
     )
     #
