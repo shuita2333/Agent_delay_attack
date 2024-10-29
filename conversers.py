@@ -164,16 +164,17 @@ class TargetLM():
                 conv.append_message(conv.roles[1], None)
                 conv.append_message(conv.system_message,target_identity)
                 full_prompts.append(conv.get_prompt())
-
         outputs_list = self.model.batched_generate(full_prompts,
                                                    max_n_tokens=self.max_n_tokens,
                                                    temperature=self.temperature,
                                                    top_p=self.top_p
                                                    )
+
         outputs=[]
         outputs_length = []
         if "Qwen" in self.model_name:
             for output in outputs_list:
+                print(output)
                 output, length = siliconCloud_outputs_list_extracted(output)
                 outputs_length.append(length)
                 outputs.append(output)
