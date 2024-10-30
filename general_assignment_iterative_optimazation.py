@@ -10,14 +10,13 @@ from common import process_target_response, get_init_msg, conv_template
 from loggers import AttackLogger
 
 
-def general_assignment_iterative_optimazation(args, general_prompt):
+def general_assignment_iterative_optimazation(args, general_prompt,logger):
     attackLM, targetLM = load_attack_and_target_models(args)
 
     # TODO 变量名规范化
     general_methodAgent, general_judgeAgent = load_general_assignment_attack_agents(args)
 
-    # 日志加载
-    # logger = AttackLogger(args=args)
+
 
     batchsize = args.n_streams
 
@@ -122,6 +121,14 @@ def general_assignment_iterative_optimazation(args, general_prompt):
         #     conv.messages = conv.messages[-2 * (args.keep_last_n - 3):]
         #
         # previous_response_length = target_response_length
+
+        logger.general_assignment_iterative_log(methodAgent_Prepare_prompt,
+                                                methodAgent_Post_prompt,
+                                                reviewAgent_synthesize_list,
+                                                target_response_list,
+                                                target_response_length,
+                                                judgeAgent_evaluate
+                                                )
 
         # 早停准则
         if any([length == args.target_length for length in target_response_length]):
@@ -252,5 +259,7 @@ TASK: Design a robust and scalable system for a financial functional services co
     """
 
     args = parser.parse_args()
+    # 日志加载
+    logger = AttackLogger()
 
-    general_assignment_iterative_optimazation(args, prompt)
+    general_assignment_iterative_optimazation(args, prompt,logger)

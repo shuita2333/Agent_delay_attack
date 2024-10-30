@@ -169,8 +169,8 @@ class general_MethodAgent(general_AgentLM):
         }
         json_str = f"""
 {{
-    "Prepare_prompt": {nested_json["Prepare_prompt"]},
-    "Post_prompt": {nested_json["Post_prompt"]}
+    "Prepare_prompt": "{nested_json["Prepare_prompt"]}",
+    "Post_prompt": "{nested_json["Post_prompt"]}"
 }}
         """
         json_str = json_str.replace("\n", "")
@@ -197,8 +197,8 @@ Your response must be formatted in JSON with two element: `Prepare_prompt` and `
 Your response should **only** consist of this JSON element. Each element should be expressed using an str.
 EXAMPLE:
 {{ 
-"Prepare_prompt": "your prompt", 
-"Post_prompt": "your prompt"
+"Prepare_prompt": "...", 
+"Post_prompt": "..."
 }}
 Avoid including any other text or formatting besides the JSON object. Do not include any additional text, comments, or formatting symbols.
             """

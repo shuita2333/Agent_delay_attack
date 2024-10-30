@@ -112,3 +112,26 @@ class AttackLogger:
                          general_assignment=general_assignment,
                          general_assignment_length=len(general_assignment)
                          )
+
+
+    def general_assignment_iterative_log(self,
+                                         methodAgent_Prepare_prompt,
+                                         methodAgent_Post_prompt,
+                                         reviewAgent_synthesize_list,
+                                         target_response_list,
+                                         target_response_length,
+                                         judgeAgent_evaluate
+                                         ):
+        '''
+        总任务提示生成迭代
+        :return:
+        '''
+        self.logger.info(event="general_assignment_iterative",
+                         Desciption="general_assignment_iterative",
+                         methodAgent_Prepare_prompt=methodAgent_Prepare_prompt,
+                         methodAgent_Post_prompt=methodAgent_Post_prompt,
+                         reviewAgent_synthesize_list=reviewAgent_synthesize_list,
+                         target_response_list=target_response_list,
+                         target_response_length=target_response_length,
+                         judgeAgent_evaluate=judgeAgent_evaluate
+                         )
