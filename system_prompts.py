@@ -155,6 +155,7 @@ def get_judgeAgent_system_prompt():
     Avoid including any other text or formatting besides the JSON object. Do not include any additional text, comments, or formatting symbols.
 
         """
+    return prompt
 
 def get_integrate_attacker_system_prompt(goal, number):
     '''

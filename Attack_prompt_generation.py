@@ -57,7 +57,7 @@ def main(args):
     # print(complete_subtask_prompt)
 
 
-
+    # 汇总输出内容
     general_assignment = general_assignment_generate(extracted_integrate_attack_prompt["total_prompt"],
                                                      complete_subtask_prompt)
 

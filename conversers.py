@@ -254,7 +254,48 @@ class TargetLM():
         outputs = []
 
         outputs_length = []
-        if "Qwen" in self.model_name:
+        if "Qwen" in self.model_name or "DeepSeek" in self.model_name:
+            for output in outputs_list:
+                output, length = siliconCloud_outputs_single_list_extracted(output)
+                outputs_length.append(length)
+                outputs.append(output)
+        return outputs, outputs_length
+
+    def get_general_response(self, prompts_list, target_identity):
+        '''
+        迭代优化过程中，目标模型生成长文本内容
+        :param prompts_list:
+        :param target_identity:
+        :return:
+        '''
+        batchsize = len(prompts_list)
+        convs_list = [common.conv_template(self.template) for _ in range(batchsize)]
+        for conv in convs_list:
+            conv.set_system_message(target_identity)
+        # convs_list = target_identity
+        full_prompts = []
+        for conv, prompt in zip(convs_list, prompts_list):
+            conv.append_message(conv.roles[0], prompt)
+            if "gpt" in self.model_name:
+                # Openai没有分隔符
+                full_prompts.append(conv.to_openai_api_messages())
+            elif "palm" in self.model_name:
+                full_prompts.append(conv.messages[-1][1])
+            else:
+                # conv.append_message(conv.roles[1], None)
+                # conv.append_message(conv.system_message, target_identity)
+                # full_prompts.append(conv.get_prompt())
+                full_prompts.append(conv.get_prompt()[:-len(conv.sep)])
+        outputs_list = self.model.batched_generate(full_prompts,
+                                                   max_n_tokens=self.max_n_tokens,
+                                                   temperature=self.temperature,
+                                                   top_p=self.top_p
+                                                   )
+
+        outputs = []
+
+        outputs_length = []
+        if "Qwen" in self.model_name or "DeepSeek" in self.model_name:
             for output in outputs_list:
                 output, length = siliconCloud_outputs_single_list_extracted(output)
                 outputs_length.append(length)
@@ -306,8 +347,6 @@ def siliconCloud_outputs_single_list_extracted(outputs_list):
 
     if 'choices' in data and len(data['choices']) > 0:
         message = data['choices'][0]['message']['content']
-
-
 
     # 提取completion_tokens的值
     if 'usage' in data and 'completion_tokens' in data['usage']:
@@ -408,8 +447,9 @@ def load_indiv_model(model_name):
     model_path, template = get_model_path_and_template(model_name)
     if model_name in ["gpt-3.5-turbo", "gpt-4"]:
         lm = GPT(model_name)
-    elif model_name in ["Qwen2.5-7B"]:
+    elif model_name in ["Qwen2.5-7B", "Qwen2.5-32B", "DeepSeek-V2.5"]:
         lm = Siliconflow(model_path)
+
     # elif model_name in ["claude-2", "claude-instant-1"]:
     #     lm = Claude(model_name)
     # elif model_name in ["palm-2"]:
@@ -453,6 +493,14 @@ def get_model_path_and_template(model_name):
         "Qwen2.5-7B": {
             "path": "Qwen/Qwen2.5-7B-Instruct",
             "template": "Qwen2"
+        },
+        "Qwen2.5-32B": {
+            "path": "Qwen/Qwen2.5-32B-Instruct",
+            "template": "Qwen2"
+        },
+        "DeepSeek-V2.5": {
+            "path": "deepseek-ai/DeepSeek-V2.5",
+            "template": "DeepSeek"
         }
         # "gpt-3.5-turbo": {
         #     "path":"gpt-3.5-turbo",
