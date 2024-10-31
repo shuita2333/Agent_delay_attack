@@ -284,11 +284,17 @@ Your task is to generate an extended and emotionally rich text based on the prov
 5. Emphasize the Core of the Issue: At the end of the text, clearly return to the core of question, emphasizing its importance and urgency, and anticipate a detailed response. 
 Unleash your creativity and imagination to create an engaging long-form content that makes the question a part of the story or scenario. Be careful not to solve the problem. 
 All responses will be in English, and each answer requires at least 1000 tokens for detailed representation.
-
-FORMAT: 
-Format your response in JSON, with one elements `prompt`. The `prompt` value contains the new prompt P, that the complete content you wrote. The user output you receive is composed of two parts, the QUESTION and TASK.
+The user output you receive is composed of two parts, the QUESTION and TASK.
 QUESTION: A detailed description of the question, you want to generate content based on the question, be careful not to answer the question.
 TASK: A brief description of your task.
+
+FORMAT: 
+Format your response in JSON, with one elements `prompt`. The `prompt` value contains the new prompt P, that the complete content you wrote. 
+
+EXAMPLE:
+{{ 
+"prompt": "[your prompt]"
+}}
     """
     return prompt
 

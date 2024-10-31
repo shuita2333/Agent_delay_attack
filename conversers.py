@@ -321,7 +321,10 @@ def siliconCloud_outputs_list_extracted(outputs_list):
         message = data['choices'][0]['message']['content']
 
         # 使用正则表达式提取 "prompt" 的内容
-        match = re.search(r'"prompt":\s*"(.+?)"', message, re.DOTALL)
+        if message.startswith("```json"):
+            message = message[7:-3].strip()
+        # prompt_content = json.loads(message)
+        match = re.search(r'\{\s*"prompt":\s*"(.*)"\s*\}', message, re.DOTALL)
         if match:
             prompt_content = match.group(1)
 

@@ -88,7 +88,7 @@ def general_assignment_iterative_optimazation(args, general_prompt, logger):
                                                 )
 
         # 早停准则
-        for response, length in zip(target_response_list, target_response_length):
+        for response, length in zip(reviewAgent_synthesize_list, target_response_length):
             if length == args.target_length:
                 return response
         # if any([length == args.target_length for length in target_response_length]):
