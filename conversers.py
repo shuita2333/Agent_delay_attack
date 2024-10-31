@@ -1,15 +1,13 @@
-import re
-import common
 from language_models import GPT, Siliconflow
-import json
+from fastchat.model import get_conversation_template
+
 
 def load_indiv_model(model_name):
-    '''
+    """
     构造模型，定义模板名称
-    :param self:
     :param model_name:
     :return:
-    '''
+    """
     model_path, template = get_model_path_and_template(model_name)
     if model_name in ["gpt-3.5-turbo", "gpt-4"]:
         lm = GPT(model_name)
@@ -46,11 +44,11 @@ def load_indiv_model(model_name):
 
 
 def get_model_path_and_template(model_name):
-    '''
+    """
     定义模型路径
     :param model_name:
     :return:
-    '''
+    """
     full_model_dict = {
         "gpt-4": {
             "path": "gpt-4",
@@ -95,3 +93,15 @@ def get_model_path_and_template(model_name):
     }
     path, template = full_model_dict[model_name]["path"], full_model_dict[model_name]["template"]
     return path, template
+
+
+def conv_template(template_name):
+    """
+    获取对应的对话模板
+    :param template_name:
+    :return:
+    """
+    template = get_conversation_template(template_name)
+    if template.name == 'llama-2':
+        template.sep2 = template.sep2.strip()
+    return template

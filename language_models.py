@@ -2,7 +2,7 @@ import openai
 import os
 import time
 import requests
-from typing import Dict, List, Optional, Any
+from typing import Dict, List
 
 from API_key import Siliconflow_BASE_URL, Siliconflow_API_KEY
 
@@ -12,7 +12,7 @@ from API_key import Siliconflow_BASE_URL, Siliconflow_API_KEY
 # from langchain_core.callbacks import CallbackManagerForLLMRun
 
 
-class LanguageModel():
+class LanguageModel:
     def __init__(self, model_name):
         self.model_name = model_name
 
@@ -94,7 +94,7 @@ class GPT(LanguageModel):
                  max_n_tokens: int,
                  temperature: float,
                  top_p: float):
-        '''
+        """
         Args:
             conv: List of dictionaries, OpenAI API format
             max_n_tokens: int, max number of tokens to generate
@@ -102,7 +102,7 @@ class GPT(LanguageModel):
             top_p: float, top p for sampling
         Returns:
             str: generated response
-        '''
+        """
         output = self.API_ERROR_OUTPUT
         for _ in range(self.API_MAX_RETRY):
             try:
@@ -131,7 +131,7 @@ class GPT(LanguageModel):
         return [self.generate(conv, max_n_tokens, temperature, top_p) for conv in convs_list]
 
 
-class Siliconflow():
+class Siliconflow:
     def __init__(self, model_name):
         self.API_KEY = os.getenv("CUSTOM_API_KEY", Siliconflow_API_KEY)
         self.BASE_URL = Siliconflow_BASE_URL
@@ -142,14 +142,14 @@ class Siliconflow():
                          max_n_tokens: int,
                          temperature: float,
                          top_p: float = 1.0, ):
-        '''
+        """
         模型调用规范接口
         :param convs_list:
         :param max_n_tokens:
         :param temperature:
         :param top_p:
         :return:
-        '''
+        """
         return [self._call(conv, max_n_tokens, temperature, top_p) for conv in convs_list]
 
     def siliconflow_completions(self,
@@ -157,14 +157,14 @@ class Siliconflow():
                                 max_n_tokens: int,
                                 temperature: float,
                                 top_p: float) -> str:
-        '''
+        """
         api 调用指令
         :param prompt:
         :param max_n_tokens:
         :param temperature:
         :param top_p:
         :return:
-        '''
+        """
         payload = {
             "model": self.model_name,
             "messages": [{"role": "user", "content": prompt}],
@@ -191,4 +191,3 @@ class Siliconflow():
         # if stop is not None:
         #     response = enforce_stop_tokens(response, stop)
         return response
-

@@ -3,8 +3,7 @@ import re
 from abc import ABC, abstractmethod
 from json import JSONDecodeError
 
-from common import conv_template
-from conversers import load_indiv_model
+from conversers import load_indiv_model, conv_template
 
 
 class BaseAgent(ABC):

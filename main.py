@@ -22,7 +22,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--n-question",
         type=int,
-        default=4,
+        default=8,
         help="子问题数 Number of concurrent jailbreak conversations. If this is too large, then there may be out of "
              "memory errors."
     )

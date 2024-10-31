@@ -83,5 +83,3 @@ TASK: {task}
     merged or omitted."""
 
     return prompt
-
-
