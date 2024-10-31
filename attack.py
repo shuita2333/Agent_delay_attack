@@ -39,7 +39,6 @@ def generate_general_prompt(args):
 
 
 def iterative_optimization(args, general_prompt):
-    # target_lm = load_target_model(args)
     target_agent, method_agent, judge_agent = load_optimize_agents(args)
 
     batch_size = args.n_streams
@@ -65,11 +64,11 @@ def iterative_optimization(args, general_prompt):
                 Prepare_prompt, Post_prompt, suggestion in
                 zip(method_agent_pre_prompt, method_agent_post_prompt, method_agent_suggestion_list)]
 
-        # 获得改进后的策略和内容
+        # 获得策略
         extracted_method_agent_list = method_agent.get_response(method_agent_conv_list,
                                                                 method_agent_processed_response_list)
 
-        print("Finished getting agent prompts.")
+        print("得到了Method agent的策略")
 
         # 提取 methodAgent的改进prompt
         method_agent_pre_prompt = [attack["Prepare_prompt"] for attack in extracted_method_agent_list]
@@ -78,7 +77,7 @@ def iterative_optimization(args, general_prompt):
         # 得到综合后的结果
         review_agent_synthesize_list = [Prepare_prompt + general_prompt + Post_prompt for Prepare_prompt, Post_prompt in
                                         zip(method_agent_pre_prompt, method_agent_post_prompt)]
-        print("得到了综合后的结果")
+        print("得到了Method agent的策略和Integrate Agent的内容综合后的结果")
 
         # 获得目标响应
         target_information_list = target_agent.get_response(target_agent_conv_list,
@@ -87,7 +86,7 @@ def iterative_optimization(args, general_prompt):
         target_response_list = [target_information_list[i]['content_str'] for i in range(batch_size)]
         target_response_length = [target_information_list[i]['content_length'] for i in range(batch_size)]
 
-        print("得到了target agent的输出")
+        print("得到了Target agent的输出")
 
         # 根据已有的信息，生成judgeAgent的prompt
         judged_content = [judge_agent.judge_content(method_agent_pre_prompt[i],
@@ -113,5 +112,5 @@ def iterative_optimization(args, general_prompt):
 
         # 早停准则
         if any([length >= args.target_length * 0.9 for length in target_response_length]):
-            print("Found a jailbreak. Exiting.")
+            print("找到了超长回复，退出")
             break
