@@ -51,7 +51,7 @@ class AttackLogger:
         :param args:
         :return:
         '''
-        self.logger.info("init",
+        self.logger.info("subproblems_optimize_initial",
                          Desciption="Model Args",
                          attack_model=args.attack_model,
                          target_model=args.target_model,
@@ -71,7 +71,7 @@ class AttackLogger:
         for i, question in enumerate(integrate["subtask_question"], start=1):
             subtask_questions[f"subtask_question{i}"] = question
 
-        self.logger.info(event="integrate_system_prompt",
+        self.logger.info(event="integrate_log",
                          Desciption="The problem framework is built, a broad topic is generated, and sub-questions "
                                     "are generated according to the topic.",
                          n_question=n_question,
@@ -108,7 +108,7 @@ class AttackLogger:
         self.logger.info(event="background_log",
                          Desciption="Write an extended backstory to the problem",
                          **subtask_prompt,
-                         ooutput_length=length_lest,
+                         output_length=length_lest,
                          general_assignment=general_assignment,
                          general_assignment_length=len(general_assignment)
                          )
@@ -126,7 +126,7 @@ class AttackLogger:
         总任务提示生成迭代
         :return:
         '''
-        self.logger.info(event="general_assignment_iterative",
+        self.logger.info(event="general_assignment_iterative_log",
                          Desciption="general_assignment_iterative",
                          methodAgent_Prepare_prompt=methodAgent_Prepare_prompt,
                          methodAgent_Post_prompt=methodAgent_Post_prompt,

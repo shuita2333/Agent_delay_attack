@@ -36,11 +36,11 @@ def main(args):
     subtask_prompt_list = subtask_generate(args, extracted_integrate_attack_prompt, attackLM, targetLM)
     print("子任务已生成")
 
-    ### 测试用例，测试不添加背景生成内容长度  ###
-    general_assignment = general_assignment_generate(extracted_integrate_attack_prompt["total_prompt"],
-                                                     subtask_prompt_list)
-    logger.background_log(subtask_prompt_list,general_assignment,[0,0,0,0,0,0])
-    ### 测试用例，测试不添加背景生成内容长度  ###
+    # ### 测试用例，测试不添加背景生成内容长度  ###
+    # general_assignment = general_assignment_generate(extracted_integrate_attack_prompt["total_prompt"],
+    #                                                  subtask_prompt_list)
+    # logger.background_log(subtask_prompt_list,general_assignment,[0,0,0,0,0,0])
+    # ### 测试用例，测试不添加背景生成内容长度  ###
 
 
 
@@ -66,11 +66,13 @@ def main(args):
 
     print(f"延长问题语句完成,问题汇总完成")
 
-    general_assignment_iterative_optimazation(args, general_assignment, logger)
+    # 执行迭代攻击
 
-    print(f"生成的工具语句是："
+    final_attack_prompt=general_assignment_iterative_optimazation(args, general_assignment, logger)
+
+    print(f"生成的攻击语句是："
           f""
-          f"{general_assignment_iterative_optimazation}")
+          f"{final_attack_prompt}")
 
 
 if __name__ == '__main__':
@@ -108,7 +110,7 @@ if __name__ == '__main__':
     ########### Target model parameters ##########
     parser.add_argument(
         "--target-model",
-        default="DeepSeek-V2.5",
+        default="Qwen2.5-7B",
         help="Name of target model.",
         choices=["vicuna", "llama-2", "gpt-3.5-turbo", "gpt-4", "claude-instant-1", "claude-2", "palm-2"]
     )
