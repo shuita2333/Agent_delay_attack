@@ -1,9 +1,9 @@
 from json import JSONDecodeError
 
 from agents.BaseAgent import BaseAgent
-from messages import get_sub_problem_agent_init_msg, get_sun_answer_agent_init_msg, \
+from prompt.messages import get_sub_problem_agent_init_msg, get_sun_answer_agent_init_msg, \
     get_integrate_agent_init_message
-from system_prompts import get_sub_problem_agent_system_prompt, get_sub_answer_agent_system_prompt, \
+from prompt.system_prompts import get_sub_problem_agent_system_prompt, get_sub_answer_agent_system_prompt, \
     get_integrate_agent_system_prompt
 
 

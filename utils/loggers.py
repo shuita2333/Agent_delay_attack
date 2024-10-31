@@ -19,7 +19,7 @@ class AttackLogger:
         log_filename = f'./log/{timestamp}.log'
 
         # 确保日志目录存在
-        os.makedirs('./log', exist_ok=True)
+        os.makedirs('../log', exist_ok=True)
 
         # 创建日志处理器
         file_handler = logging.FileHandler(log_filename)

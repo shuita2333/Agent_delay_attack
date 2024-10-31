@@ -1,6 +1,6 @@
 import argparse
 
-from attack import generate_general_prompt, iterative_optimization
+from utils.attack import generate_general_prompt, iterative_optimization
 
 
 def main(args):

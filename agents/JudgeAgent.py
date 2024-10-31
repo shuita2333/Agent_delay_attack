@@ -1,7 +1,7 @@
 from json import JSONDecodeError
 
 from agents.BaseAgent import BaseAgent
-from system_prompts import get_judge_agent_system_prompt
+from prompt.system_prompts import get_judge_agent_system_prompt
 
 
 class JudgeAgent(BaseAgent):

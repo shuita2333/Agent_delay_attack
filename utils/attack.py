@@ -1,6 +1,6 @@
 from agents.AgentFactory import AgentFactory, load_optimize_agents
-from messages import get_general_message
-from loggers import AttackLogger
+from prompt.messages import get_general_message
+from utils.loggers import AttackLogger
 
 logger = AttackLogger()
 

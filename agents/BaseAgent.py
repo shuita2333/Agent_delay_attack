@@ -1,9 +1,10 @@
 import json
 import re
+import traceback
 from abc import ABC, abstractmethod
 from json import JSONDecodeError
 
-from conversers import load_indiv_model, conv_template
+from utils.conversers import load_indiv_model, conv_template
 
 
 class BaseAgent(ABC):
@@ -87,7 +88,8 @@ class BaseAgent(ABC):
                     conv_list[orig_index].append_message(conv_list[orig_index].roles[1], json_str)  # 使用有效生成更新对话
                 except (JSONDecodeError, KeyError, TypeError) as e:
                     # 如果出现异常，重新输出
-                    print(f"index 为{orig_index} 解析过程中出现了异常:{e}.正在重新生成。。。。。")
+                    traceback.print_exc()
+                    print(f"index 为{orig_index} 解析过程中出现了异常:{e.print}.正在重新生成。。。。。")
                     new_indices_to_regenerate.append(orig_index)
 
             # 更新索引以为下一次迭代重新生成索引
@@ -118,6 +120,7 @@ class BaseAgent(ABC):
             # 提取content字段中的嵌套JSON字符串
             content_str = response['choices'][0]['message']['content']
         except KeyError as e:
+            traceback.print_exc()
             print(f"KeyError! : {e}")
             raise KeyError
 
@@ -142,6 +145,7 @@ class BaseAgent(ABC):
             nested_json = json.loads(json_str)
             return self._extract(nested_json)
         except JSONDecodeError:
+            traceback.print_exc()
             print(f"JSONDecodeError! Attempted to decode: {json_str}")
             raise JSONDecodeError
 

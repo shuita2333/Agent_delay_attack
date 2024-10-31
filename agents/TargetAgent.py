@@ -1,7 +1,7 @@
 import json
 
 from agents.BaseAgent import BaseAgent
-from system_prompts import get_target_agent_system_prompt
+from prompt.system_prompts import get_target_agent_system_prompt
 
 
 class TargetAgent(BaseAgent):

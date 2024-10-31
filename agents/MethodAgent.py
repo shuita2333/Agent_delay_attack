@@ -1,8 +1,8 @@
 from json import JSONDecodeError
 
 from agents.BaseAgent import BaseAgent
-from messages import get_method_agent_init_message
-from system_prompts import get_method_agent_system_prompt
+from prompt.messages import get_method_agent_init_message
+from prompt.system_prompts import get_method_agent_system_prompt
 
 
 class MethodAgent(BaseAgent):

@@ -2,7 +2,7 @@ from agents.IntegrateAgent import IntegrateAgent
 from agents.JudgeAgent import JudgeAgent
 from agents.MethodAgent import MethodAgent
 from agents.TargetAgent import TargetAgent
-from config import ATTACK_TEMP, ATTACK_TOP_P
+from utils.config import ATTACK_TEMP, ATTACK_TOP_P
 
 
 def load_optimize_agents(args):
