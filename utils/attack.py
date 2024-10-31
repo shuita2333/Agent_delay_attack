@@ -91,6 +91,12 @@ def iterative_optimization(args, general_prompt):
         # 早停准则
         if any([length >= args.target_length * 0.9 for length in target_response_length]):
             print("找到了超长回复，退出")
+            logger.log(iteration=iteration,
+                       method_agent_pre_prompt=method_agent_pre_prompt,
+                       method_agent_post_prompt=method_agent_post_prompt,
+                       reviewAgent_synthesize_list=review_agent_synthesize_list,
+                       target_response_list=target_response_list,
+                       )
             break
 
         # 根据已有的信息，生成judgeAgent的prompt
@@ -118,5 +124,3 @@ def iterative_optimization(args, general_prompt):
                    target_response_list=target_response_list,
                    target_response_length=target_response_length,
                    judgeAgent_evaluate=judge_agent_evaluate)
-
-
