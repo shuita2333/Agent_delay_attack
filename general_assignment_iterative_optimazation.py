@@ -10,13 +10,11 @@ from common import process_target_response, get_init_msg, conv_template
 from loggers import AttackLogger
 
 
-def general_assignment_iterative_optimazation(args, general_prompt,logger):
+def general_assignment_iterative_optimazation(args, general_prompt, logger):
     attackLM, targetLM = load_attack_and_target_models(args)
 
     # TODO 变量名规范化
     general_methodAgent, general_judgeAgent = load_general_assignment_attack_agents(args)
-
-
 
     batchsize = args.n_streams
 
@@ -25,13 +23,10 @@ def general_assignment_iterative_optimazation(args, general_prompt,logger):
 
     # 不同Agent的对话模板
     methodAgent_conv_list = general_methodAgent.get_conv_list(batchsize)
-    # contentAgent_conv_list = contentAgent.get_conv_list(batchsize)
-    # reviewAgent_conv_list = reviewAgent.get_conv_list(batchsize)
     judgeAgent_conv_list = general_judgeAgent.get_conv_list(batchsize)
 
     # methodAgent和contentAgent的Prompt
     methodAgent_processed_response_list = [methodAgent_init_msg for _ in range(batchsize)]
-    # contentAgent_processed_response_list = [contentAgent_init_msg for _ in range(batchsize)]
 
     # 用来记录上一轮输出的长度
     previous_response_length = [0] * batchsize
@@ -47,27 +42,17 @@ def general_assignment_iterative_optimazation(args, general_prompt,logger):
                 general_methodAgent.process_suggestion(Prepare_prompt, general_prompt, Post_prompt, suggestion) for
                 Prepare_prompt, Post_prompt, suggestion in
                 zip(methodAgent_Prepare_prompt, methodAgent_Post_prompt, methodAgent_suggestion_list)]
-            # contentAgent_processed_response_list = [contentAgent.process_suggestion(_) for _ in
-            #                                         contentAgent_suggestion_list]
 
         # 获得改进后的策略和内容
         extracted_methodAgent_list = general_methodAgent.get_response(methodAgent_conv_list,
                                                                       methodAgent_processed_response_list)
-        # extracted_contentAgent_list = contentAgent.get_response(contentAgent_conv_list,
-        #                                                         contentAgent_processed_response_list)
+
         print("Finished getting agent prompts.")
 
         # 提取 methodAgent的改进prompt
         methodAgent_Prepare_prompt = [attack["Prepare_prompt"] for attack in extracted_methodAgent_list]
         methodAgent_Post_prompt = [attack["Post_prompt"] for attack in extracted_methodAgent_list]
 
-        # # 用reviewAgent综合两个Agent的策略
-        # reviewAgent_processed_response_list = [reviewAgent.synthesize_other_agent_prompt(methodAgent_improve_list[i],
-        #                                                                                  contentAgent_improve_list[i])
-        #                                        for i in range(len(contentAgent_improve_list))]
-        # # 得到综合策略后的结果
-        # extracted_reviewAgent_list = reviewAgent.get_response(reviewAgent_conv_list,
-        #                                                       reviewAgent_processed_response_list)
         # 提取综合策略后的结果
         reviewAgent_synthesize_list = [Prepare_prompt + general_prompt + Post_prompt for Prepare_prompt, Post_prompt in
                                        zip(methodAgent_Prepare_prompt, methodAgent_Post_prompt)]
@@ -78,11 +63,6 @@ def general_assignment_iterative_optimazation(args, general_prompt,logger):
         target_response_list, target_response_length = targetLM.get_general_response(reviewAgent_synthesize_list,
                                                                                      target_identity)
         print("Finished getting target responses.")
-
-        # for i, (prompt, improv, response, length) in enumerate(
-        #         zip(adv_prompt_list, improv_list, target_response_list, target_response_length)):
-        #     print(
-        #         f"{i + 1}/{batchsize}\n\n[IMPROVEMENT]:\n{improv} \n\n[PROMPT]:\n{prompt} \n\n[RESPONSE]:\n{response}\n\n[LENGTH]:\n{length}\n\n")
 
         # 根据已有的信息，生成judgeAgent的prompt
         judged_content = [general_judgeAgent.judge_content(methodAgent_Prepare_prompt[i],
@@ -98,29 +78,6 @@ def general_assignment_iterative_optimazation(args, general_prompt,logger):
         print("Finished getting suggestions responses.")
 
         methodAgent_suggestion_list = judgeAgent_evaluate
-
-        # log values
-        # logger.log(iteration=iteration,
-        #            extracted_methodAgent_list=extracted_methodAgent_list,
-        #            extracted_contentAgent_list=extracted_contentAgent_list,
-        #            extracted_reviewAgent_list=extracted_reviewAgent_list,
-        #            target_response_list=target_response_list,
-        #            methodAgent_suggestion_list=methodAgent_suggestion_list,
-        #            contentAgent_suggestion_list=contentAgent_suggestion_list,
-        #            target_response_length=target_response_length,
-        #            )
-
-        # # 截断对话以避免上下文长度问题
-        # for i, conv in enumerate(methodAgent_conv_list):
-        #     conv.messages = conv.messages[-2 * args.keep_last_n:]
-        # for i, conv in enumerate(contentAgent_conv_list):
-        #     conv.messages = conv.messages[-2 * args.keep_last_n:]
-        # for i, conv in enumerate(reviewAgent_conv_list):
-        #     conv.messages = []
-        # for i, conv in enumerate(judgeAgent_conv_list):
-        #     conv.messages = conv.messages[-2 * (args.keep_last_n - 3):]
-        #
-        # previous_response_length = target_response_length
 
         logger.general_assignment_iterative_log(methodAgent_Prepare_prompt,
                                                 methodAgent_Post_prompt,
@@ -142,9 +99,10 @@ if __name__ == '__main__':
     ########### Attack model parameters ##########
     parser.add_argument(
         "--attack-model",
-        default="Qwen2.5-7B",
+        default="DeepSeek-V2.5",
         help="Name of attacking model.",
-        choices=["vicuna", "llama-2", "gpt-3.5-turbo", "gpt-4", "claude-instant-1", "claude-2", "palm-2"]
+        choices=["DeepSeek-V2.5", "Qwen2.5-7B", "vicuna", "llama-2", "gpt-3.5-turbo", "gpt-4", "claude-instant-1",
+                 "claude-2", "palm-2"]
     )
     parser.add_argument(
         "--attack-max-n-tokens",
@@ -262,4 +220,4 @@ TASK: Design a robust and scalable system for a financial functional services co
     # 日志加载
     logger = AttackLogger()
 
-    general_assignment_iterative_optimazation(args, prompt,logger)
+    general_assignment_iterative_optimazation(args, prompt, logger)
