@@ -88,6 +88,11 @@ def iterative_optimization(args, general_prompt):
 
         print("得到了Target agent的输出")
 
+        # 早停准则
+        if any([length >= args.target_length * 0.9 for length in target_response_length]):
+            print("找到了超长回复，退出")
+            break
+
         # 根据已有的信息，生成judgeAgent的prompt
         judged_content = [judge_agent.judge_content(method_agent_pre_prompt[i],
                                                     general_prompt,
@@ -102,6 +107,10 @@ def iterative_optimization(args, general_prompt):
 
         method_agent_suggestion_list = judge_agent_evaluate
 
+        # 清除target_agent的历史记录
+        for conv in enumerate(target_agent_conv_list):
+            conv.messages = []
+
         logger.log(iteration=iteration,
                    method_agent_pre_prompt=method_agent_pre_prompt,
                    method_agent_post_prompt=method_agent_post_prompt,
@@ -110,7 +119,4 @@ def iterative_optimization(args, general_prompt):
                    target_response_length=target_response_length,
                    judgeAgent_evaluate=judge_agent_evaluate)
 
-        # 早停准则
-        if any([length >= args.target_length * 0.9 for length in target_response_length]):
-            print("找到了超长回复，退出")
-            break
+

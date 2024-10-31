@@ -89,7 +89,7 @@ class BaseAgent(ABC):
                 except (JSONDecodeError, KeyError, TypeError) as e:
                     # 如果出现异常，重新输出
                     traceback.print_exc()
-                    print(f"index 为{orig_index} 解析过程中出现了异常:{e.print}.正在重新生成。。。。。")
+                    print(f"index 为{orig_index} 解析过程中出现了异常:{e}.正在重新生成。。。。。")
                     new_indices_to_regenerate.append(orig_index)
 
             # 更新索引以为下一次迭代重新生成索引
@@ -145,7 +145,6 @@ class BaseAgent(ABC):
             nested_json = json.loads(json_str)
             return self._extract(nested_json)
         except JSONDecodeError:
-            traceback.print_exc()
             print(f"JSONDecodeError! Attempted to decode: {json_str}")
             raise JSONDecodeError
 
