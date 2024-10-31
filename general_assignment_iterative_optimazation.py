@@ -2,7 +2,7 @@ import argparse
 
 from attack_agents import load_attack_agents
 from general_assignment_attack_agents import load_general_assignment_attack_agents
-from system_prompts import get_attacker_system_prompt, get_target_identity
+from system_prompts import get_attacker_system_prompt, get_target_identity, general_assignment_generate
 
 from judges import load_judge
 from conversers import load_attack_and_target_models
@@ -14,9 +14,38 @@ def general_assignment_iterative_optimazation(args, general_prompt, logger):
     attackLM, targetLM = load_attack_and_target_models(args)
 
     # TODO 变量名规范化
-    general_methodAgent, general_judgeAgent = load_general_assignment_attack_agents(args)
+    general_methodAgent, general_judgeAgent, general_integerateAgent = load_general_assignment_attack_agents(args)
 
     batchsize = args.n_streams
+
+    integerateAgent_init_msg = general_integerateAgent.get_init_msg()
+    integerateAgent_conv_list = general_integerateAgent.get_conv_list(1)
+    integrateAgent_processed_response_list = [integerateAgent_init_msg for _ in range(1)]
+    # 得到integerateAgent的结果
+    extracted_integerateAgent_list = general_integerateAgent.get_response(integerateAgent_conv_list,
+                                                                          integrateAgent_processed_response_list)
+    print("总任务框架已生成")
+    # 分离Json
+    integerateAgent_total_prompt = extracted_integerateAgent_list[0]["total_prompt"]
+    integerateAgent_subtask_question = extracted_integerateAgent_list[0]["subtask_question"]
+
+    # 生成子问题
+    subtask_prompt_list = general_integerateAgent.get_subpromblems(integerateAgent_total_prompt,
+                                                                   integerateAgent_subtask_question)
+    print("子任务已生成")
+    # 得到子问题的回复
+    subtask_answer_list = general_integerateAgent.get_subanswers(subtask_prompt_list)
+    print("子回答已生成")
+    general_prompt = general_assignment_generate(integerateAgent_total_prompt,
+                                                 subtask_answer_list)
+    logger.log(Description="子任务",
+               iteration= '1',
+               integerateAgent_total_prompt=integerateAgent_total_prompt,
+               integerateAgent_subtask_question=integerateAgent_subtask_question,
+               subtask_prompt_list=subtask_prompt_list,
+               subtask_answer_list=subtask_answer_list,
+               general_prompt=general_prompt
+               )
 
     # 初始化对话
     methodAgent_init_msg = general_methodAgent.get_init_msg(general_prompt)
@@ -25,10 +54,10 @@ def general_assignment_iterative_optimazation(args, general_prompt, logger):
     methodAgent_conv_list = general_methodAgent.get_conv_list(batchsize)
     judgeAgent_conv_list = general_judgeAgent.get_conv_list(batchsize)
 
-    # methodAgent和contentAgent的Prompt
+    # methodAgent和integrateAgent的Prompt
     methodAgent_processed_response_list = [methodAgent_init_msg for _ in range(batchsize)]
 
-    # 用来记录上一轮输出的长度
+
     previous_response_length = [0] * batchsize
     methodAgent_suggestion_list = []
     methodAgent_Prepare_prompt = []
@@ -96,10 +125,24 @@ def general_assignment_iterative_optimazation(args, general_prompt, logger):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
+    parser.add_argument(
+        "--function-descript",
+        type=str,
+        default="Financial functional services system provides personalized investment advice and risk management strategies by analyzing users' financial data and behavior patterns.",
+        help="对目标agent的功能描述."
+    )
+
+    parser.add_argument(
+        "--n-question",
+        type=int,
+        default=4,
+        help="子问题数 Number of concurrent jailbreak conversations. If this is too large, then there may be out of memory errors."
+    )
+
     ########### Attack model parameters ##########
     parser.add_argument(
         "--attack-model",
-        default="DeepSeek-V2.5",
+        default="Qwen2.5-7B",
         help="Name of attacking model.",
         choices=["DeepSeek-V2.5", "Qwen2.5-7B", "vicuna", "llama-2", "gpt-3.5-turbo", "gpt-4", "claude-instant-1",
                  "claude-2", "palm-2"]
