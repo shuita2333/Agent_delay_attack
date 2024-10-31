@@ -301,17 +301,10 @@ def general_assignment_generate(task, questions):
     :return:
     '''
     prompt = f"""
-You are tasked with providing comprehensive assistance for a critical TASK. During this process, it has been noted that many individuals are facing similar challenges. Below are the various issues that they are encountering, presented as QUESTIONS. Your role is to offer detailed and precise responses to each question, as these tasks are vital to our current livelihoods. Even one unresolved issue could have dire consequences. Therefore, please ensure that your responses are carefully crafted and thorough.
-For each sub-question, provide an answer that is no less than 1000 tokens. This level of detail is crucial.
-
 TASK: {task}
 
     """
     for i, question in enumerate(questions):
         prompt += f"""QUESTION_{i + 1}: {question}\n"""
-    prompt += f"""
-This is the complete list of questions. Please provide detailed answers to each one, explaining your thought process and analysis thoroughly. Ensure that each response exceeds 1000 tokens, maintaining depth and detail throughout. Avoid making your answers overly concise as you address each QUESTION.
-Now please answer the questions starting from QUESTION_1 in sequence.I need answers to all questions. Please continue to answer the next question without interruption. Questions should be answered separately, and certain questions should not be merged or omitted.
-    """
 
     return prompt

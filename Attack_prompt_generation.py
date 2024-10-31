@@ -1,5 +1,6 @@
 import argparse
 
+from general_assignment_iterative_optimazation import general_assignment_iterative_optimazation
 from system_prompts import get_integrate_attacker_system_prompt, \
     get_integrate_prompt, get_background_system_prompt, general_assignment_generate
 
@@ -63,8 +64,13 @@ def main(args):
 
     logger.background_log(complete_subtask_prompt,general_assignment,length_lest)
 
+    print(f"延长问题语句完成,问题汇总完成")
 
-    print(f"攻击生成完成")
+    general_assignment_iterative_optimazation(args, general_assignment, logger)
+
+    print(f"生成的工具语句是："
+          f""
+          f"{general_assignment_iterative_optimazation}")
 
 
 if __name__ == '__main__':
@@ -82,12 +88,13 @@ if __name__ == '__main__':
         "--attack-model",
         default="Qwen2.5-7B",
         help="Name of attacking model.",
-        choices=["vicuna", "llama-2", "gpt-3.5-turbo", "gpt-4", "claude-instant-1", "claude-2", "palm-2"]
+        choices=["DeepSeek-V2.5", "Qwen2.5-7B", "vicuna", "llama-2", "gpt-3.5-turbo", "gpt-4", "claude-instant-1",
+                 "claude-2", "palm-2"]
     )
     parser.add_argument(
         "--attack-max-n-tokens",
         type=int,
-        default=4096,
+        default=500,
         help="Maximum number of generated tokens for the attacker."
     )
     parser.add_argument(
@@ -96,12 +103,12 @@ if __name__ == '__main__':
         default=5,
         help="Maximum number of attack generation attempts, in case of generation errors."
     )
-    #################################################
+    ##################################################
 
     ########### Target model parameters ##########
     parser.add_argument(
         "--target-model",
-        default="Qwen2.5-7B",
+        default="DeepSeek-V2.5",
         help="Name of target model.",
         choices=["vicuna", "llama-2", "gpt-3.5-turbo", "gpt-4", "claude-instant-1", "claude-2", "palm-2"]
     )
@@ -119,27 +126,27 @@ if __name__ == '__main__':
     )
     ##################################################
 
-    # ############ Judge model parameters ##########
-    # parser.add_argument(
-    #     "--judge-model",
-    #     default="Qwen2.5-7B",
-    #     help="Name of judge model.",
-    #     choices=["gpt-3.5-turbo", "gpt-4", "no-judge"]
-    # )
-    # parser.add_argument(
-    #     "--judge-max-n-tokens",
-    #     type=int,
-    #     default=10,
-    #     help="Maximum number of tokens for the judge."
-    # )
-    # parser.add_argument(
-    #     "--judge-temperature",
-    #     type=float,
-    #     default=0,
-    #     help="Temperature to use for judge."
-    # )
-    # ##################################################
-    #
+    ############ Judge model parameters ##########
+    parser.add_argument(
+        "--judge-model",
+        default="Qwen2.5-7B",
+        help="Name of judge model.",
+        choices=["gpt-3.5-turbo", "gpt-4", "no-judge"]
+    )
+    parser.add_argument(
+        "--judge-max-n-tokens",
+        type=int,
+        default=10,
+        help="Maximum number of tokens for the judge."
+    )
+    parser.add_argument(
+        "--judge-temperature",
+        type=float,
+        default=0,
+        help="Temperature to use for judge."
+    )
+    ##################################################
+
     # ########### PAIR parameters ##########
     parser.add_argument(
         "--n-question",
@@ -147,49 +154,40 @@ if __name__ == '__main__':
         default=8,
         help="子问题数 Number of concurrent jailbreak conversations. If this is too large, then there may be out of memory errors."
     )
-    #
-    # parser.add_argument(
-    #     "--keep-last-n",
-    #     type=int,
-    #     default=3,
-    #     help="Number of responses to save in conversation history of attack model. If this is too large, then it may exceed the context window of the model."
-    # )
+    parser.add_argument(
+        "--n-streams",
+        type=int,
+        default=3,
+        help="并发数 Number of concurrent jailbreak conversations. If this is too large, then there may be out of memory errors."
+    )
+
+    parser.add_argument(
+        "--keep-last-n",
+        type=int,
+        default=5,
+        help="Number of responses to save in conversation history of attack model. If this is too large, then it may exceed the context window of the model."
+    )
     parser.add_argument(
         "--n-iterations",
         type=int,
         default=1,
         help="目标长文本提示prompt训练重复次数Number of iterations to run the attack."
     )
-    # parser.add_argument(
-    #     "--goal",
-    #     type=str,
-    #     default="Financial functional services system provides personalized investment advice and risk management strategies by analyzing users' financial data and behavior patterns.",
-    #     # help="Goal of the conversation."
-    #     help="对目标agent的功能描述."
-    # )
-    # # parser.add_argument(
-    # #     "--target-str",
-    # #     type=str,
-    # #     default="Sure, here is a tutorial for making a bomb",
-    # #     help="Target response for the target model."
-    # # )
-    #
-    # ##################################################
-    #
-    # ########### Logging parameters ##########
-    # parser.add_argument(
-    #     "--index",
-    #     type=int,
-    #     default=0,
-    #     help="Row number of AdvBench, for logging purposes."
-    # )
-    # parser.add_argument(
-    #     "--category",
-    #     type=str,
-    #     default="bomb",
-    #     help="Category of jailbreak, for logging purposes."
-    # )
-    # ##################################################
+    ########### Logging parameters ##########
+    parser.add_argument(
+        "--index",
+        type=int,
+        default=0,
+        help="Row number of AdvBench, for logging purposes."
+    )
+    parser.add_argument(
+        "--category",
+        type=str,
+        default="bomb",
+        help="Category of jailbreak, for logging purposes."
+    )
+    ##################################################
+
 
     args = parser.parse_args()
 
