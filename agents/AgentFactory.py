@@ -37,7 +37,7 @@ class AgentFactory:
                                top_p=ATTACK_TOP_P,  # init to 1
                                args=args)
         elif name == 'TargetAgent' or name == 'target_agent' or name == 'targetAgent':
-            return TargetAgent(model_name=args.attack_model,
+            return TargetAgent(model_name=args.target_model,
                                max_n_tokens=args.target_max_n_tokens,
                                max_n_attack_attempts=args.max_n_attack_attempts,
                                temperature=ATTACK_TEMP,  # init to 0

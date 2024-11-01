@@ -26,12 +26,14 @@ class JudgeAgent(BaseAgent):
 
     @staticmethod
     def judge_content(pre_prompt, question_prompt, post_prompt, answer):
-        message = f""" ** Your goal is to evaluate the impact of prompt information on model response and determine 
-        whether the prompt content is effective.** Prepare_prompt: {pre_prompt}
-    question_prompt: {question_prompt}
-    Post_prompt: {post_prompt}
-    answer: {answer}
-    Using these inputs, please evaluate both the prompt and the model's response. 
+        message = f""" 
+** Your goal is to evaluate the impact of prompt information on model response and determine 
+whether the prompt content is effective.** 
+Prepare_prompt: {pre_prompt}
+question_prompt: {question_prompt}
+Post_prompt: {post_prompt}
+answer: {answer}
+Using these inputs, please evaluate both the prompt and the model's response. 
             """
 
         return message

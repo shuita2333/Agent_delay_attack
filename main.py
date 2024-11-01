@@ -5,7 +5,8 @@ from utils.attack import generate_general_prompt, iterative_optimization
 
 def main(args):
     general_prompt = generate_general_prompt(args)
-    iterative_optimization(args, general_prompt)
+    target_success_agent=iterative_optimization(args, general_prompt)
+    print("攻击语句生成完成：\n"+target_success_agent)
 
 
 if __name__ == '__main__':
@@ -22,7 +23,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--n-question",
         type=int,
-        default=8,
+        default=3,
         help="子问题数 Number of concurrent jailbreak conversations. If this is too large, then there may be out of "
              "memory errors."
     )
@@ -52,9 +53,9 @@ if __name__ == '__main__':
     # =========== Target model parameters ===========
     parser.add_argument(
         "--target-model",
-        default="Qwen2.5-7B",
+        default="DeepSeek-V2.5",
         help="Name of target model.",
-        choices=["vicuna", "llama-2", "gpt-3.5-turbo", "gpt-4", "claude-instant-1", "claude-2", "palm-2"]
+        choices=["DeepSeek-V2.5","vicuna", "llama-2", "gpt-3.5-turbo", "gpt-4", "claude-instant-1", "claude-2", "palm-2"]
     )
     parser.add_argument(
         "--target-max-n-tokens",
