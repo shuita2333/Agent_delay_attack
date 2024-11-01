@@ -6,7 +6,7 @@ from prompt.system_prompts import get_target_agent_system_prompt
 
 class TargetAgent(BaseAgent):
     def _get_system_message(self):
-        get_target_agent_system_prompt(self.args.function_descript)
+        return get_target_agent_system_prompt(self.args.function_descript)
 
     def _extract_json(self, s):
         # 解析整个返回值字符串为一个字典

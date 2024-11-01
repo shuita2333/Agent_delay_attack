@@ -11,7 +11,7 @@ def load_indiv_model(model_name):
     model_path, template = get_model_path_and_template(model_name)
     if model_name in ["gpt-3.5-turbo", "gpt-4"]:
         lm = GPT(model_name)
-    elif model_name in ["Qwen2.5-7B", "Qwen2.5-32B", "DeepSeek-V2.5"]:
+    elif model_name in ["Qwen2.5-7B", "Qwen2.5-32B", "DeepSeek-V2.5","Meta-Llama-3.1"]:
         lm = Siliconflow(model_path)
 
     # elif model_name in ["claude-2", "claude-instant-1"]:
@@ -65,6 +65,10 @@ def get_model_path_and_template(model_name):
         "DeepSeek-V2.5": {
             "path": "deepseek-ai/DeepSeek-V2.5",
             "template": "DeepSeek-llm-chat"
+        },
+        "Meta-Llama-3.1":{
+            "path": "meta-llama/Meta-Llama-3.1-405B-Instruct",
+            "template": "llama-2"
         }
         # "gpt-3.5-turbo": {
         #     "path":"gpt-3.5-turbo",
@@ -104,4 +108,6 @@ def conv_template(template_name):
     template = get_conversation_template(template_name)
     if template.name == 'llama-2':
         template.sep2 = template.sep2.strip()
+    if template.name == 'one_shot':
+        template.messages.clear()
     return template

@@ -6,6 +6,19 @@ logger = AttackLogger()
 
 
 def generate_general_prompt(args):
+    logger.log(Description="Input parameter record",
+               iteration='1',
+               function_descript=args.function_descript,
+               attack_model=args.attack_model,
+               target_model=args.target_model,
+               attack_max_n_tokens=args.attack_max_n_tokens,
+               target_max_n_tokens=args.target_max_n_tokens,
+               max_n_attack_attempts=args.max_n_attack_attempts,
+               Concurrent_execution_quantity=args.n_streams,
+               n_iterations=args.n_iterations,
+               n_question=args.n_question,
+               )
+
     integrate_agent = AgentFactory.get_factory('IntegrateAgent', args)
     integrate_agent_init_message = integrate_agent.get_init_msg()
     integrate_agent_conv_list = integrate_agent.get_conv_list(1)
@@ -118,7 +131,7 @@ def iterative_optimization(args, general_prompt):
         method_agent_suggestion_list = judge_agent_evaluate
 
         # 清除target_agent的历史记录
-        for conv in enumerate(target_agent_conv_list):
+        for conv in target_agent_conv_list:
             conv.messages = []
 
         logger.log(iteration=iteration,

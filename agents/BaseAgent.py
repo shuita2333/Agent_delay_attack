@@ -129,6 +129,8 @@ class BaseAgent(ABC):
 
         # 解析嵌套的JSON字符串
         json_str = re.sub(r'[\x00-\x1F\x7F]', '', json_str)
+        if '{{' in json_str and '}}' in json_str:
+            json_str = json_str.replace('{{', '{').replace('}}', '}')
         if json_str.endswith("."):
             json_str = json_str + '"}'
         elif json_str.endswith('"'):
