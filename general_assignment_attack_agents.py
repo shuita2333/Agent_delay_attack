@@ -1,3 +1,5 @@
+### 已弃用  ###
+
 import json
 import logging
 import re

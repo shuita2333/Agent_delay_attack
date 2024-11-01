@@ -1,3 +1,5 @@
+### 已弃用  ###
+
 import argparse
 
 from general_assignment_iterative_optimazation import general_assignment_iterative_optimazation

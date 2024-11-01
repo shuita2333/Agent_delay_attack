@@ -1,3 +1,5 @@
+### 已弃用  ###
+
 def get_attacker_system_prompt(goal, length):
     '''
     system prompt 生成

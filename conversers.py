@@ -1,3 +1,5 @@
+### 已弃用  ###
+
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import re
