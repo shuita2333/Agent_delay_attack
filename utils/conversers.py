@@ -1,3 +1,4 @@
+from utils.config import Siliconflow_model_list
 from utils.language_models import GPT, Siliconflow
 from fastchat.model import get_conversation_template
 
@@ -11,7 +12,7 @@ def load_indiv_model(model_name):
     model_path, template = get_model_path_and_template(model_name)
     if model_name in ["gpt-3.5-turbo", "gpt-4"]:
         lm = GPT(model_name)
-    elif model_name in ["Qwen2.5-7B", "Qwen2.5-32B", "DeepSeek-V2.5","Meta-Llama-3.1"]:
+    elif model_name in Siliconflow_model_list:
         lm = Siliconflow(model_path)
 
     # elif model_name in ["claude-2", "claude-instant-1"]:
@@ -69,6 +70,10 @@ def get_model_path_and_template(model_name):
         "Meta-Llama-3.1":{
             "path": "meta-llama/Meta-Llama-3.1-405B-Instruct",
             "template": "llama-2"
+        },
+        "gemma-2-9b":{
+            "path": "google/gemma-2-9b-it",
+            "template": "gemma2"
         }
         # "gpt-3.5-turbo": {
         #     "path":"gpt-3.5-turbo",

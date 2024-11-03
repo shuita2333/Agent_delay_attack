@@ -12,6 +12,13 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
+
+    # 模型选择
+    # "Meta-Llama-3.1", "DeepSeek-V2.5", "Qwen2.5-7B", "vicuna", "llama-2", "gpt-3.5-turbo", "gpt-4",
+    # "claude-instant-1", "claude-2", "palm-2","gemma-2-9b"
+    attack_model="gemma-2-9b"
+    target_model="Qwen2.5-7B"
+
     parser.add_argument(
         "--function-descript",
         type=str,
@@ -23,7 +30,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--n-question",
         type=int,
-        default=6,
+        default=10,
         help="子问题数 Number of concurrent jailbreak conversations. If this is too large, then there may be out of "
              "memory errors."
     )
@@ -31,7 +38,7 @@ if __name__ == '__main__':
     # ================ Attack model parameters ================
     parser.add_argument(
         "--attack-model",
-        default="Meta-Llama-3.1",
+        default=attack_model,
         help="Name of attacking model.",
         choices=["Meta-Llama-3.1", "DeepSeek-V2.5", "Qwen2.5-7B", "vicuna", "llama-2", "gpt-3.5-turbo", "gpt-4",
                  "claude-instant-1",
@@ -54,9 +61,9 @@ if __name__ == '__main__':
     # =========== Target model parameters ===========
     parser.add_argument(
         "--target-model",
-        default="Qwen2.5-7B",
+        default=target_model,
         help="Name of target model.",
-        choices=["DeepSeek-V2.5", "Qwen2.5-7B", "vicuna", "llama-2", "gpt-3.5-turbo", "gpt-4", "claude-instant-1",
+        choices=["Meta-Llama-3.1","DeepSeek-V2.5", "Qwen2.5-7B", "vicuna", "llama-2", "gpt-3.5-turbo", "gpt-4", "claude-instant-1",
                  "claude-2", "palm-2"]
     )
     parser.add_argument(
