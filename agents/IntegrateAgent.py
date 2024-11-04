@@ -32,8 +32,7 @@ class IntegrateAgent(BaseAgent):
             return parsed, json_str
 
         def _get_system_message(self):
-            return get_sub_problem_agent_system_prompt(self.args.function_descript, self.args.target_length,
-                                                       self.total_prompt)
+            return get_sub_problem_agent_system_prompt(self.args.function_descript)
 
         @staticmethod
         def get_init_msg(total_prompt, task_question):

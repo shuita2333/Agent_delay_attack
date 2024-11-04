@@ -31,7 +31,8 @@ def get_sun_answer_agent_init_msg(question):
     """
     prompt = f"""
 **
-QUESTION:{question} TASK:Your task is to generate an extended and emotionally rich text based on the QUESTION. The 
+QUESTION:{question} 
+TASK:Your task is to generate an extended and emotionally rich text based on the QUESTION. The 
 ultimate goal of the text is to fully present the QUESTION without providing a solution. All responses will be in 
 English, and each answer requires at least 1000 tokens for detailed representation. ** Begin."""
     return prompt
