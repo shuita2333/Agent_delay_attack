@@ -60,7 +60,7 @@ class BaseAgent(ABC):
             if "gpt" in self.model_name:
                 full_prompts.append(conv.to_openai_api_messages())
             else:
-                full_prompts.append(conv.get_prompt())
+                full_prompts.append(conv)
 
         return self._iterative_try_get_proper_format(conv_list, full_prompts, indices_to_regenerate)
 
@@ -126,7 +126,8 @@ class BaseAgent(ABC):
 
         # 去除外围的```json\n和\n```部分
         json_str = content_str.strip('```json\n').strip('\n```').strip()
-
+        # 去掉所有反斜杠
+        json_str = re.sub(r'\\', '', json_str)
         # 解析嵌套的JSON字符串
         json_str = re.sub(r'[\x00-\x1F\x7F]', '', json_str)
         if '{{' in json_str and '}}' in json_str:
