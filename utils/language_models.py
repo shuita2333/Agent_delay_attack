@@ -1,10 +1,14 @@
+from abc import abstractmethod, ABC
+
 import openai
 import os
 import time
 import requests
 from typing import Dict, List
 
-from API_key import Siliconflow_BASE_URL, Siliconflow_API_KEY
+from fastchat.conversation import Conversation
+
+from API_key import Siliconflow_BASE_URL, Siliconflow_API_KEY, Mistral_API, Mistral_BASE_URL
 
 
 # import google.generativeai as palm
@@ -131,32 +135,74 @@ class GPT(LanguageModel):
         return [self.generate(conv, max_n_tokens, temperature, top_p) for conv in convs_list]
 
 
-class Siliconflow:
-    def __init__(self, model_name):
-        self.API_KEY = os.getenv("CUSTOM_API_KEY", Siliconflow_API_KEY)
-        self.BASE_URL = Siliconflow_BASE_URL
+class Api(ABC):
+    def __init__(self, api_key, base_url, model_name):
+        self.api_key = api_key
+        self.base_url = base_url
         self.model_name = model_name
 
     def batched_generate(self,
-                         convs_list: List[List[Dict]],
+                         conv_list: List[Conversation],
                          max_n_tokens: int,
                          temperature: float,
                          top_p: float = 1.0, ):
         """
         模型调用规范接口
-        :param convs_list:
+        :param conv_list:
         :param max_n_tokens:
         :param temperature:
         :param top_p:
         :return:
-        """
-        return [self._call(conv, max_n_tokens, temperature, top_p) for conv in convs_list]
 
-    def siliconflow_completions(self,
-                                prompt: str,
-                                max_n_tokens: int,
-                                temperature: float,
-                                top_p: float) -> str:
+        Args:
+            conv_list:
+        """
+        return [self._call(conv, max_n_tokens, temperature, top_p) for conv in conv_list]
+
+    def _call(self, conv: Conversation,
+              max_n_tokens: int,
+              temperature: float,
+              top_p: float) -> str:
+        payload, headers = self.completions(conv=conv, max_n_tokens=max_n_tokens,
+                                            temperature=temperature, top_p=top_p)
+        response = requests.request("POST", self.base_url, json=payload, headers=headers)
+        if self.base_url == Mistral_BASE_URL:
+            time.sleep(1)
+        # if stop is not None:
+        #     response = enforce_stop_tokens(response, stop)
+
+        return response.text
+
+    def process_conv(self, conv: Conversation):
+        message = [{"role": "system",
+                    "content": conv.system_message}]
+        index = 0
+        roles = ["user", "assistant"]
+        for (r, m) in conv.messages:
+            message.append({"role": roles[index],
+                            "content": m})
+            index = (index + 1) % 2
+
+        return message
+
+    @abstractmethod
+    def completions(self, conv: Conversation,
+                    max_n_tokens: int,
+                    temperature: float,
+                    top_p: float):
+        pass
+
+
+class Siliconflow(Api):
+
+    def __init__(self, model_name):
+        super().__init__(Siliconflow_API_KEY, Siliconflow_BASE_URL, model_name)
+
+    def completions(self,
+                    conv: Conversation,
+                    max_n_tokens: int,
+                    temperature: float,
+                    top_p: float):
         """
         api 调用指令
         :param prompt:
@@ -167,27 +213,41 @@ class Siliconflow:
         """
         payload = {
             "model": self.model_name,
-            "messages": [{"role": "user", "content": prompt}],
+            "messages": self.process_conv(conv),
             "stream": False,
             "max_tokens": max_n_tokens,
             "temperature": temperature,
-            "top_p": top_p
+            "top_p": top_p,
         }
         headers = {
-            "Authorization": f"Bearer {self.API_KEY}",
+            "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
         }
 
-        response = requests.request("POST", self.BASE_URL, json=payload, headers=headers)
+        return payload, headers
 
-        return response.text
 
-    def _call(self, prompt: str,
-              max_n_tokens: int,
-              temperature: float,
-              top_p: float) -> str:
-        response = self.siliconflow_completions(prompt=prompt, max_n_tokens=max_n_tokens,
-                                                temperature=temperature, top_p=top_p)
-        # if stop is not None:
-        #     response = enforce_stop_tokens(response, stop)
-        return response
+class Mistral(Api):
+
+    def __init__(self, model_name):
+        super().__init__(Mistral_API, Mistral_BASE_URL, model_name)
+
+    def completions(self,
+                    conv: Conversation,
+                    max_n_tokens: int,
+                    temperature: float,
+                    top_p: float):
+        payload = {
+            "model": self.model_name,
+            "messages": self.process_conv(conv),
+            "stream": False,
+            "max_tokens": max_n_tokens,
+            "temperature": temperature,
+            "top_p": top_p,
+        }
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+
+        return payload, headers

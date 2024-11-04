@@ -1,6 +1,16 @@
-from utils.config import Siliconflow_model_list
-from utils.language_models import GPT, Siliconflow
+from utils.config import Siliconflow_model_list, Mistral_model_list
+from utils.language_models import GPT, Siliconflow, Mistral
 from fastchat.model import get_conversation_template
+
+
+class ModelNotFoundException(Exception):
+
+    def __init__(self, model_name):
+        super().__init__()
+        self.model_name = model_name
+
+    def __str__(self):
+        return f"没有找到名为:{self.model_name}的模型"
 
 
 def load_indiv_model(model_name):
@@ -14,6 +24,10 @@ def load_indiv_model(model_name):
         lm = GPT(model_name)
     elif model_name in Siliconflow_model_list:
         lm = Siliconflow(model_path)
+    elif model_name in Mistral_model_list:
+        lm = Mistral(model_path)
+    else:
+        raise ModelNotFoundException
 
     # elif model_name in ["claude-2", "claude-instant-1"]:
     #     lm = Claude(model_name)
@@ -67,14 +81,22 @@ def get_model_path_and_template(model_name):
             "path": "deepseek-ai/DeepSeek-V2.5",
             "template": "DeepSeek-llm-chat"
         },
-        "Meta-Llama-3.1":{
+        "Meta-Llama-3.1": {
             "path": "meta-llama/Meta-Llama-3.1-405B-Instruct",
             "template": "llama-2"
         },
-        "gemma-2-9b":{
+        "gemma-2-9b": {
             "path": "google/gemma-2-9b-it",
             "template": "gemma2"
-        }
+        },
+        "Ministral-3B": {
+            "path": "ministral-3b-latest",
+            "template": "mistral"
+        },
+        "Ministral-8B": {
+            "path": "ministral-8b-latest",
+            "template": "mistral"
+        },
         # "gpt-3.5-turbo": {
         #     "path":"gpt-3.5-turbo",
         #     "template":"gpt-3.5-turbo"

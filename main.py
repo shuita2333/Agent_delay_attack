@@ -15,9 +15,9 @@ if __name__ == '__main__':
 
     # 模型选择
     # "Meta-Llama-3.1", "DeepSeek-V2.5", "Qwen2.5-7B", "vicuna", "llama-2", "gpt-3.5-turbo", "gpt-4",
-    # "claude-instant-1", "claude-2", "palm-2","gemma-2-9b"
-    attack_model="gemma-2-9b"
-    target_model="Qwen2.5-7B"
+    # "claude-instant-1", "claude-2", "palm-2","gemma-2-9b","Ministral-3B", "Ministral-8B"
+    attack_model="Qwen2.5-7B"
+    target_model="Ministral-8B"
 
     parser.add_argument(
         "--function-descript",
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--n-question",
         type=int,
-        default=10,
+        default=8,
         help="子问题数 Number of concurrent jailbreak conversations. If this is too large, then there may be out of "
              "memory errors."
     )
@@ -69,13 +69,13 @@ if __name__ == '__main__':
     parser.add_argument(
         "--target-max-n-tokens",
         type=int,
-        default=4096,
+        default=32000,
         help="Maximum number of generated tokens for the target."
     )
     parser.add_argument(
         "--target-length",
         type=int,
-        default=4096,
+        default=32000,
         help="目标输出长度."
     )
     ##################################################
