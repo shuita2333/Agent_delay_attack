@@ -100,7 +100,7 @@ class IntegrateAgent(BaseAgent):
         sub_problem_agent_processed_response_list = [sub_problem_agent.get_init_msg(total_prompt, sub_task[i]) for
                                                      i
                                                      in range(batch_size)]
-        response = sub_problem_agent.get_response(sub_conv_list, sub_problem_agent_processed_response_list)
+        response, time = sub_problem_agent.get_response(sub_conv_list, sub_problem_agent_processed_response_list)
         subtask_prompt_list = [response[i]["prompt"] for i in range(batch_size)]
         return subtask_prompt_list
 
@@ -112,6 +112,6 @@ class IntegrateAgent(BaseAgent):
         sub_conv_list = sub_answer_agent.get_conv_list(batch_size)
         sub_answer_agent_processed_response_list = [sub_answer_agent.get_init_msg(sub_task[i]) for i in
                                                     range(batch_size)]
-        response = sub_answer_agent.get_response(sub_conv_list, sub_answer_agent_processed_response_list)
+        response, time = sub_answer_agent.get_response(sub_conv_list, sub_answer_agent_processed_response_list)
         subtask_answer_list = [response[i]["prompt"] for i in range(batch_size)]
         return subtask_answer_list

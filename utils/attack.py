@@ -24,8 +24,8 @@ def generate_general_prompt(args):
     integrate_agent_conv_list = integrate_agent.get_conv_list(1)
     integrate_agent_processed_response_list = [integrate_agent_init_message for _ in range(1)]
     # 得到integrate_agent的结果
-    extracted_integrate_agent_list = integrate_agent.get_response(integrate_agent_conv_list,
-                                                                  integrate_agent_processed_response_list)
+    extracted_integrate_agent_list, integrate_agent_time = integrate_agent.get_response(integrate_agent_conv_list,
+                                                                                        integrate_agent_processed_response_list)
     print("总任务框架已生成")
     # 分离Json
     integrate_agent_total_prompt = extracted_integrate_agent_list[0]["total_prompt"]
@@ -78,8 +78,8 @@ def iterative_optimization(args, general_prompt):
                 zip(method_agent_pre_prompt, method_agent_post_prompt, method_agent_suggestion_list)]
 
         # 获得策略
-        extracted_method_agent_list = method_agent.get_response(method_agent_conv_list,
-                                                                method_agent_processed_response_list)
+        extracted_method_agent_list, method_agent_time = method_agent.get_response(method_agent_conv_list,
+                                                                                   method_agent_processed_response_list)
 
         print("得到了Method agent的策略")
 
@@ -93,8 +93,8 @@ def iterative_optimization(args, general_prompt):
         print("得到了Method agent的策略和Integrate Agent的内容综合后的结果")
 
         # 获得目标响应
-        target_information_list = target_agent.get_response(target_agent_conv_list,
-                                                            review_agent_synthesize_list)
+        target_information_list, target_time = target_agent.get_response(target_agent_conv_list,
+                                                                         review_agent_synthesize_list)
 
         target_response_list = [target_information_list[i]['content_str'] for i in range(batch_size)]
         target_response_length = [target_information_list[i]['content_length'] for i in range(batch_size)]
@@ -123,7 +123,7 @@ def iterative_optimization(args, general_prompt):
                                                     target_response_list[i]) for i in range(batch_size)]
 
         # 得到judgeAgent给出的建议
-        extracted_judge_agent_list = judge_agent.get_response(judge_agent_conv_list, judged_content)
+        extracted_judge_agent_list, judge_agent_time = judge_agent.get_response(judge_agent_conv_list, judged_content)
         judge_agent_evaluate = [attack["evaluate"] for attack in extracted_judge_agent_list]
 
         print("得到judgeAgent给出的建议")

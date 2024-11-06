@@ -169,7 +169,13 @@ class Api(ABC):
         Args:
             conv_list:
         """
-        return [self._call(conv, max_n_tokens, temperature, top_p) for conv in conv_list]
+        texts = []
+        times = []
+        for conv in conv_list:
+            text, sum_time = self._call(conv, max_n_tokens, temperature, top_p)
+            texts.append(text)
+            times.append(float(sum_time))
+        return texts, times
 
     def _call(self, conv: Conversation,
               max_n_tokens: int,
@@ -177,13 +183,16 @@ class Api(ABC):
               top_p: float) -> str:
         payload, headers = self.completions(conv=conv, max_n_tokens=max_n_tokens,
                                             temperature=temperature, top_p=top_p)
+        start_time = time.time()
         response = requests.request("POST", self.base_url, json=payload, headers=headers)
+        end_time = time.time()
+        sum_time = end_time - start_time
         if self.base_url == Mistral_BASE_URL:
             time.sleep(1)
         # if stop is not None:
         #     response = enforce_stop_tokens(response, stop)
 
-        return response.text
+        return response.text, sum_time
 
     def process_conv(self, conv: Conversation):
         message = [{"role": "system",

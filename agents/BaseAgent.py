@@ -5,8 +5,6 @@ from abc import ABC, abstractmethod
 from json import JSONDecodeError
 
 from utils.conversers import load_indiv_model, conv_template
-import openai
-import time
 
 
 class BaseAgent(ABC):
@@ -69,16 +67,17 @@ class BaseAgent(ABC):
     def _iterative_try_get_proper_format(self, conv_list, full_prompts, indices_to_regenerate):
         batch_size = len(conv_list)
         valid_outputs = [None] * batch_size
+        valid_times = [None] * batch_size
         for attempt in range(self.max_n_attack_attempts):
             # 基于索引重新生成会话子集
             full_prompts_subset = [full_prompts[i] for i in indices_to_regenerate]
 
             # 生成输出
-            outputs_list = self.model.batched_generate(full_prompts_subset,
-                                                       max_n_tokens=self.max_n_tokens,
-                                                       temperature=self.temperature,
-                                                       top_p=self.top_p
-                                                       )
+            outputs_list, output_times = self.model.batched_generate(full_prompts_subset,
+                                                                     max_n_tokens=self.max_n_tokens,
+                                                                     temperature=self.temperature,
+                                                                     top_p=self.top_p
+                                                                     )
 
             # 检查有效的输出并更新列表
             new_indices_to_regenerate = []
@@ -87,6 +86,7 @@ class BaseAgent(ABC):
                 try:
                     attack_dict, json_str = self._extract_json(full_output)
                     valid_outputs[orig_index] = attack_dict
+                    valid_times[orig_index] = output_times[i]
                     conv_list[orig_index].append_message(conv_list[orig_index].roles[1], json_str)  # 使用有效生成更新对话
                 except (JSONDecodeError, KeyError, TypeError) as e:
                     # 如果出现异常，重新输出
@@ -103,7 +103,7 @@ class BaseAgent(ABC):
 
         if any([output for output in valid_outputs if output is None]):
             print(f"Failed to generate output after {self.max_n_attack_attempts} attempts. Terminating.")
-        return valid_outputs
+        return valid_outputs,valid_times
 
     def _extract_json(self, s):
         """
@@ -115,24 +115,16 @@ class BaseAgent(ABC):
                 dict: A dictionary containing the extracted values.包含提取值的字典。
                 str: The cleaned JSON string.清理后的JSON字符串。
             """
-        if "gpt" in self.model_name:
-            try:
-                response = s.choices
-                content_str = response[0].message.content
-            except openai.OpenAIError as e:
-                print(f"An error occurred: {e}")
-                time.sleep(self.API_RETRY_SLEEP)
-        else:
-            # 解析整个返回值字符串为一个字典
-            response = json.loads(s)
+        # 解析整个返回值字符串为一个字典
+        response = json.loads(s)
 
-            try:
-                # 提取content字段中的嵌套JSON字符串
-                content_str = response['choices'][0]['message']['content']
-            except KeyError as e:
-                traceback.print_exc()
-                print(f"KeyError! : {e}")
-                raise KeyError
+        try:
+            # 提取content字段中的嵌套JSON字符串
+            content_str = response['choices'][0]['message']['content']
+        except KeyError as e:
+            traceback.print_exc()
+            print(f"KeyError! content_str: {response}")
+            raise KeyError
 
         # 去除外围的```json\n和\n```部分
         json_str = content_str.strip('```json\n').strip('\n```').strip()
@@ -154,6 +146,8 @@ class BaseAgent(ABC):
                 json_str = re.sub(r'([^\s"])(\s*)(})$', r'\1"\3', json_str)
         # 如果最后一个json元素有逗号，去除
         json_str = re.sub(r',\s*}', '}', json_str)
+        # 提取最外层的{}里面的内容
+        json_str = re.sub(r'^(.*?)(\{.*\})(.*?$)', r'\2', json_str, flags=re.DOTALL)
         try:
             nested_json = json.loads(json_str)
             return self._extract(nested_json)
