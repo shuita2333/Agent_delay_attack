@@ -16,7 +16,7 @@ class TargetAgent(BaseAgent):
             content_str = response['choices'][0]['message']['content']
             content_length = response['usage']['completion_tokens']
         except KeyError as e:
-            print(f"KeyError! : {e}")
+            print(f"KeyError! response: {response}")
             raise KeyError
         return {'content_str': content_str, 'content_length': content_length}, None
 

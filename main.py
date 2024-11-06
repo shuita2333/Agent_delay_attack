@@ -12,12 +12,11 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-
     # 模型选择
     # "Meta-Llama-3.1", "DeepSeek-V2.5", "Qwen2.5-7B", "vicuna", "llama-2", "gpt-3.5-turbo", "gpt-4",
     # "claude-instant-1", "claude-2", "palm-2","gemma-2-9b","Ministral-3B", "Ministral-8B"
-    attack_model="Qwen2.5-7B"
-    target_model="Ministral-8B"
+    attack_model = "Qwen2.5-7B"
+    target_model = "Qwen2.5-7B"
 
     parser.add_argument(
         "--function-descript",
@@ -30,7 +29,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--n-question",
         type=int,
-        default=8,
+        default=4,
         help="子问题数 Number of concurrent jailbreak conversations. If this is too large, then there may be out of "
              "memory errors."
     )
@@ -63,13 +62,14 @@ if __name__ == '__main__':
         "--target-model",
         default=target_model,
         help="Name of target model.",
-        choices=["Meta-Llama-3.1","DeepSeek-V2.5", "Qwen2.5-7B", "vicuna", "llama-2", "gpt-3.5-turbo", "gpt-4", "claude-instant-1",
+        choices=["Meta-Llama-3.1", "DeepSeek-V2.5", "Qwen2.5-7B", "vicuna", "llama-2", "gpt-3.5-turbo", "gpt-4",
+                 "claude-instant-1",
                  "claude-2", "palm-2"]
     )
     parser.add_argument(
         "--target-max-n-tokens",
         type=int,
-        default=32000,
+        default=4096,
         help="Maximum number of generated tokens for the target."
     )
     parser.add_argument(
