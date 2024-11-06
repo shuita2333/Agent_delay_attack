@@ -20,7 +20,7 @@ def load_indiv_model(model_name):
     :return:
     """
     model_path, template = get_model_path_and_template(model_name)
-    if model_name in ["gpt-3.5-turbo", "gpt-4"]:
+    if model_name in ["gpt-3.5-turbo", "gpt-4", "gpt-4o-mini"]:
         lm = GPT(model_name)
     elif model_name in Siliconflow_model_list:
         lm = Siliconflow(model_path)
@@ -67,6 +67,10 @@ def get_model_path_and_template(model_name):
     full_model_dict = {
         "gpt-4": {
             "path": "gpt-4",
+            "template": "gpt-4"
+        },
+        "gpt-4o-mini": {
+            "path": "gpt-4o-mini-2024-07-18",
             "template": "gpt-4"
         },
         "Qwen2.5-7B": {

@@ -7,8 +7,9 @@ import requests
 from typing import Dict, List
 
 from fastchat.conversation import Conversation
+from openai import OpenAI
 
-from API_key import Siliconflow_BASE_URL, Siliconflow_API_KEY, Mistral_API, Mistral_BASE_URL
+from API_key import Siliconflow_BASE_URL, Siliconflow_API_KEY, Mistral_API, Mistral_BASE_URL, OPENAI_API_KEY
 
 
 # import google.generativeai as palm
@@ -91,8 +92,8 @@ class GPT(LanguageModel):
     API_ERROR_OUTPUT = "$ERROR$"
     API_QUERY_SLEEP = 0.5
     API_MAX_RETRY = 5
-    API_TIMEOUT = 20
-    openai.api_key = os.getenv("OPENAI_API_KEY")
+    API_TIMEOUT = 100
+    openai.api_key = OPENAI_API_KEY
 
     def generate(self, conv: List[Dict],
                  max_n_tokens: int,
@@ -110,22 +111,33 @@ class GPT(LanguageModel):
         output = self.API_ERROR_OUTPUT
         for _ in range(self.API_MAX_RETRY):
             try:
-                response = openai.ChatCompletion.create(
-                    model=self.model_name,
-                    messages=conv,
-                    max_tokens=max_n_tokens,
-                    temperature=temperature,
-                    top_p=top_p,
-                    request_timeout=self.API_TIMEOUT,
-                )
-                output = response["choices"][0]["message"]["content"]
+                client = OpenAI(api_key=openai.api_key)
+                response = client.chat.completions.create(
+                        model=self.model_name,
+                        messages=conv,
+                        max_tokens=max_n_tokens,
+                        temperature=temperature,
+                        top_p=top_p,
+                        timeout=self.API_TIMEOUT
+                    )
+                # response = openai.ChatCompletion.create(
+                #     model=self.model_name,
+                #     messages=conv,
+                #     max_tokens=max_n_tokens,
+                #     temperature=temperature,
+                #     top_p=top_p,
+                #     request_timeout=self.API_TIMEOUT,
+                # )
+                # # 检查 response 对象的结构
+                # choices = response.choices
+                # output = choices[0].message.content
                 break
-            except openai.error.OpenAIError as e:
-                print(type(e), e)
+            except openai.OpenAIError as e:
+                print(f"An error occurred: {e}")
                 time.sleep(self.API_RETRY_SLEEP)
 
             time.sleep(self.API_QUERY_SLEEP)
-        return output
+        return response
 
     def batched_generate(self,
                          convs_list: List[List[Dict]],

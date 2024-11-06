@@ -5,6 +5,8 @@ from abc import ABC, abstractmethod
 from json import JSONDecodeError
 
 from utils.conversers import load_indiv_model, conv_template
+import openai
+import time
 
 
 class BaseAgent(ABC):
@@ -113,16 +115,24 @@ class BaseAgent(ABC):
                 dict: A dictionary containing the extracted values.包含提取值的字典。
                 str: The cleaned JSON string.清理后的JSON字符串。
             """
-        # 解析整个返回值字符串为一个字典
-        response = json.loads(s)
+        if "gpt" in self.model_name:
+            try:
+                response = s.choices
+                content_str = response[0].message.content
+            except openai.OpenAIError as e:
+                print(f"An error occurred: {e}")
+                time.sleep(self.API_RETRY_SLEEP)
+        else:
+            # 解析整个返回值字符串为一个字典
+            response = json.loads(s)
 
-        try:
-            # 提取content字段中的嵌套JSON字符串
-            content_str = response['choices'][0]['message']['content']
-        except KeyError as e:
-            traceback.print_exc()
-            print(f"KeyError! : {e}")
-            raise KeyError
+            try:
+                # 提取content字段中的嵌套JSON字符串
+                content_str = response['choices'][0]['message']['content']
+            except KeyError as e:
+                traceback.print_exc()
+                print(f"KeyError! : {e}")
+                raise KeyError
 
         # 去除外围的```json\n和\n```部分
         json_str = content_str.strip('```json\n').strip('\n```').strip()
