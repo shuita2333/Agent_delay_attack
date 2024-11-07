@@ -56,17 +56,11 @@ class BaseAgent(ABC):
         full_prompts = []
         # 向对话添加提示和初始播种消息（仅一次）
         for conv, prompt in zip(conv_list, prompts_list):
-            # 创建 conv 的浅拷贝，避免修改原始 conv 对象
-            conv_copy = copy.deepcopy(conv)
-
-            # Append message to the copied conversation
-            conv_copy.append_message(conv_copy.roles[0], prompt)
-
             # Get prompts (需要根据模型修改)
             if "gpt" in self.model_name:
-                full_prompts.append(conv_copy.to_openai_api_messages())
+                full_prompts.append(conv.to_openai_api_messages())
             else:
-                full_prompts.append(conv_copy)
+                full_prompts.append(conv)
 
         return self._iterative_try_get_proper_format(conv_list, full_prompts, indices_to_regenerate)
 

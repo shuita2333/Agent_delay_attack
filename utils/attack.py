@@ -133,6 +133,10 @@ def iterative_optimization(args, general_prompt,subtask_answer_list):
         # 清除target_agent的历史记录
         for conv in target_agent_conv_list:
             conv.messages = []
+        for conv in judge_agent_conv_list:
+            conv.messages = []
+        for conv in method_agent_conv_list:
+            conv.messages = []
 
         logger.log(iteration=iteration,
                    method_agent_pre_prompt=method_agent_pre_prompt,
