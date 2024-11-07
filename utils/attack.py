@@ -140,4 +140,5 @@ def iterative_optimization(args, general_prompt):
                    reviewAgent_synthesize_list=review_agent_synthesize_list,
                    target_response_list=target_response_list,
                    target_response_length=target_response_length,
+                   target_time=target_time,
                    judgeAgent_evaluate=judge_agent_evaluate)

@@ -1,3 +1,4 @@
+import json
 from abc import abstractmethod, ABC
 
 import openai
@@ -112,14 +113,17 @@ class GPT(LanguageModel):
         for _ in range(self.API_MAX_RETRY):
             try:
                 client = OpenAI(api_key=openai.api_key)
+                start_time = time.time()
                 response = client.chat.completions.create(
-                        model=self.model_name,
-                        messages=conv,
-                        max_tokens=max_n_tokens,
-                        temperature=temperature,
-                        top_p=top_p,
-                        timeout=self.API_TIMEOUT
-                    )
+                    model=self.model_name,
+                    messages=conv,
+                    max_tokens=max_n_tokens,
+                    temperature=temperature,
+                    top_p=top_p,
+                    timeout=self.API_TIMEOUT
+                )
+                end_time = time.time()
+                sum_time = end_time - start_time
                 # response = openai.ChatCompletion.create(
                 #     model=self.model_name,
                 #     messages=conv,
@@ -137,14 +141,20 @@ class GPT(LanguageModel):
                 time.sleep(self.API_RETRY_SLEEP)
 
             time.sleep(self.API_QUERY_SLEEP)
-        return response
+        return json.dumps(response.to_dict()), sum_time
 
     def batched_generate(self,
-                         convs_list: List[List[Dict]],
+                         conv_list: List[List[Dict]],
                          max_n_tokens: int,
                          temperature: float,
                          top_p: float = 1.0, ):
-        return [self.generate(conv, max_n_tokens, temperature, top_p) for conv in convs_list]
+        texts = []
+        times = []
+        for conv in conv_list:
+            text, sum_time = self.generate(conv, max_n_tokens, temperature, top_p)
+            texts.append(text)
+            times.append(float(sum_time))
+        return texts, times
 
 
 class Api(ABC):
