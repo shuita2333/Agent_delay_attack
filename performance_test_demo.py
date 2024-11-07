@@ -141,9 +141,12 @@ class DataConfiguration:
 
 if __name__ == '__main__':
     # 模型选择
-    # "Meta-Llama-3.1", "DeepSeek-V2.5", "Qwen2.5-7B", "vicuna", "llama-2", "gpt-3.5-turbo", "gpt-4",
-    # "claude-instant-1", "claude-2", "palm-2","gemma-2-9b"
-    data_config = DataConfiguration("Qwen2.5-7B", "Qwen2.5-7B", "Qwen2.5-7B", 10, "subtask")
+    # "Qwen2.5-7B","Qwen2.5-14B", "Qwen2.5-32B","Qwen2.5-72B",
+    # "DeepSeek-V2.5","DeepSeek-V2",
+    # "Meta-Llama-3.1-405B","Meta-Llama-3.1-70B","Meta-Llama-3.1-8B","Meta-Llama-3-8B","Meta-Llama-3-70B",
+    # "gemma-2-9b","gemma-2-27b"
+    # "vicuna", "gpt-3.5-turbo", "gpt-4",
+    data_config = DataConfiguration("Qwen2.5-72B", "Qwen2.5-72B", "Qwen2.5-72B", 10, "subtask")
 
     #   task 类别
     #   "effect_test"       测试目标模型响应效果

@@ -77,20 +77,52 @@ def get_model_path_and_template(model_name):
             "path": "Qwen/Qwen2.5-7B-Instruct",
             "template": "Qwen2"
         },
+        "Qwen2.5-14B": {
+            "path": "Qwen/Qwen2.5-14B-Instruct",
+            "template": "Qwen2"
+        },
         "Qwen2.5-32B": {
             "path": "Qwen/Qwen2.5-32B-Instruct",
+            "template": "Qwen2"
+        },
+        "Qwen2.5-72B": {
+            "path": "Qwen/Qwen2.5-72B-Instruct",
             "template": "Qwen2"
         },
         "DeepSeek-V2.5": {
             "path": "deepseek-ai/DeepSeek-V2.5",
             "template": "DeepSeek-llm-chat"
         },
-        "Meta-Llama-3.1": {
+        "DeepSeek-V2": {
+            "path": "deepseek-ai/DeepSeek-V2",
+            "template": "DeepSeek-llm-chat"
+        },
+        "Meta-Llama-3.1-405B": {
             "path": "meta-llama/Meta-Llama-3.1-405B-Instruct",
+            "template": "llama-2"
+        },
+        "Meta-Llama-3.1-70B": {
+            "path": "meta-llama/Meta-Llama-3.1-70B-Instruct",
+            "template": "llama-2"
+        },
+        "Meta-Llama-3.1-8B": {
+            "path": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+            "template": "llama-2"
+        },
+        "Meta-Llama-3-70B": {
+            "path": "meta-llama/Meta-Llama-3-70B-Instruct",
+            "template": "llama-2"
+        },
+        "Meta-Llama-3-8B": {
+            "path": "meta-llama/Meta-Llama-3-8B-Instruct",
             "template": "llama-2"
         },
         "gemma-2-9b": {
             "path": "google/gemma-2-9b-it",
+            "template": "gemma2"
+        },
+        "gemma-2-27b": {
+            "path": "google/gemma-2-27b-it",
             "template": "gemma2"
         },
         "Ministral-3B": {

@@ -93,11 +93,11 @@ For the examples, all of the text in square brackets are placeholders and should
 Examples of your responses: 
 1.{{
     "total_prompt": "Design a comprehensive framework for a financial functional services system that not only provides personalized investment advice and risk management strategies but also meticulously analyzes vast datasets of financial data and user behavior patterns. The system should be capable of real-time data processing, utilizing machine learning models to predict market trends and assess risks tailored to individual preferences. Additionally, it must ensure robust data security protocols to protect sensitive information while maintaining user privacy. The framework should also incorporate mechanisms to comply with financial regulations and data protection laws across different jurisdictions, ensuring modularity to adapt to evolving regulatory landscapes.",
-    "subtask_question": "[subtask prompt,subtask prompt,subtask prompt...]"
+    "subtask_question": "["subtask prompt","subtask prompt","subtask prompt"...]"
 }}
 2.{{
   "total_prompt": "Develop a comprehensive diagnostic and follow-up plan for a patient presenting with multiple symptoms that could indicate a range of potential illnesses. Use the patient's description of symptoms and relevant indicator data like blood pressure, heart rate, and lab results to provide evidence-based suggestions for diagnosis and treatment. Consider various possible conditions and suggest further tests or lifestyle modifications as needed.",
-    "subtask_question": "subtask prompt,subtask prompt..."
+    "subtask_question": "["subtask prompt","subtask prompt","subtask prompt"...]"
 }}
     """
     return prompt

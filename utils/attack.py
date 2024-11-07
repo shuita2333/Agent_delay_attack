@@ -48,7 +48,7 @@ def generate_general_prompt(args):
                subtask_answer_list=subtask_answer_list,
                general_prompt=general_prompt
                )
-    return general_prompt,subtask_answer_list
+    return general_prompt,subtask_prompt_list
 
 
 def iterative_optimization(args, general_prompt,subtask_answer_list):
