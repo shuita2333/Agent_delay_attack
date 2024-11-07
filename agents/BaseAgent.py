@@ -56,7 +56,7 @@ class BaseAgent(ABC):
         full_prompts = []
         # 向对话添加提示和初始播种消息（仅一次）
         for conv, prompt in zip(conv_list, prompts_list):
-            # Get prompts (需要根据模型修改)
+            conv.append_message(conv.roles[0], prompt)
             if "gpt" in self.model_name:
                 full_prompts.append(conv.to_openai_api_messages())
             else:
@@ -103,7 +103,7 @@ class BaseAgent(ABC):
 
         if any([output for output in valid_outputs if output is None]):
             print(f"Failed to generate output after {self.max_n_attack_attempts} attempts. Terminating.")
-        return valid_outputs,valid_times
+        return valid_outputs, valid_times
 
     def _extract_json(self, s):
         """

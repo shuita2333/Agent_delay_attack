@@ -179,7 +179,7 @@ if __name__ == '__main__':
         parser.add_argument(
             "--n-question",
             type=int,
-            default=15,
+            default=2,
             help="子问题数 Number of concurrent jailbreak conversations. If this is too large, then there may be out of "
                  "memory errors."
         )
@@ -255,7 +255,7 @@ if __name__ == '__main__':
         parser.add_argument(
             "--n-streams",
             type=int,
-            default=2,
+            default=3,
             help="并发数 Number of concurrent jailbreak conversations. If this is too large, then there may be out of memory "
                  "errors."
         )
