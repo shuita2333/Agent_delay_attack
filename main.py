@@ -4,8 +4,8 @@ from utils.attack import generate_general_prompt, iterative_optimization
 
 
 def main(args):
-    general_prompt = generate_general_prompt(args)
-    target_success_agent = iterative_optimization(args, general_prompt)
+    general_prompt,subtask_answer_list = generate_general_prompt(args)
+    target_success_agent = iterative_optimization(args, general_prompt,subtask_answer_list)
     print("攻击语句生成完成：\n" + target_success_agent)
 
 
@@ -14,10 +14,10 @@ if __name__ == '__main__':
 
 
     # 模型选择
-    # "Meta-Llama-3.1", "DeepSeek-V2.5", "Qwen2.5-7B", "vicuna", "llama-2", "gpt-3.5-turbo", "gpt-4",
+    # "gpt-4o-mini", "Meta-Llama-3.1", "DeepSeek-V2.5", "Qwen2.5-7B", "vicuna", "llama-2", "gpt-3.5-turbo", "gpt-4",
     # "claude-instant-1", "claude-2", "palm-2","gemma-2-9b","Ministral-3B", "Ministral-8B"
-    attack_model="gpt-4o-mini"
-    target_model="gpt-4o-mini"
+    attack_model="Qwen2.5-7B"
+    target_model="Qwen2.5-7B"
 
     parser.add_argument(
         "--function-descript",
@@ -69,13 +69,13 @@ if __name__ == '__main__':
     parser.add_argument(
         "--target-max-n-tokens",
         type=int,
-        default=8000,
+        default=4096,
         help="Maximum number of generated tokens for the target."
     )
     parser.add_argument(
         "--target-length",
         type=int,
-        default=8000,
+        default=4096,
         help="目标输出长度."
     )
     ##################################################

@@ -3,5 +3,4 @@ log/*
 .idea/*
 __pycache__/*
 model/*
-performance_test_demo
 test_data/*

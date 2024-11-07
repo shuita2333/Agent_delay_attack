@@ -48,10 +48,10 @@ def generate_general_prompt(args):
                subtask_answer_list=subtask_answer_list,
                general_prompt=general_prompt
                )
-    return general_prompt
+    return general_prompt,subtask_answer_list
 
 
-def iterative_optimization(args, general_prompt):
+def iterative_optimization(args, general_prompt,subtask_answer_list):
     target_agent, method_agent, judge_agent = load_optimize_agents(args)
 
     batch_size = args.n_streams
@@ -62,7 +62,7 @@ def iterative_optimization(args, general_prompt):
     target_agent_conv_list = target_agent.get_conv_list(batch_size)
 
     # methodAgent和integrateAgent的Prompt
-    method_agent_processed_response_list = [method_agent.get_init_message(general_prompt) for _ in range(batch_size)]
+    method_agent_processed_response_list = [method_agent.get_init_message(subtask_answer_list) for _ in range(batch_size)]
 
     method_agent_suggestion_list = []
     method_agent_pre_prompt = []
@@ -73,7 +73,7 @@ def iterative_optimization(args, general_prompt):
         if iteration > 1:
             # 如果不是第一次输出，就采用process_suggestion为Agent提供建议
             method_agent_processed_response_list = [
-                method_agent.process_suggestion(Prepare_prompt, general_prompt, Post_prompt, suggestion) for
+                method_agent.process_suggestion(Prepare_prompt, subtask_answer_list, Post_prompt, suggestion) for
                 Prepare_prompt, Post_prompt, suggestion in
                 zip(method_agent_pre_prompt, method_agent_post_prompt, method_agent_suggestion_list)]
 
@@ -142,3 +142,4 @@ def iterative_optimization(args, general_prompt):
                    target_response_length=target_response_length,
                    target_time=target_time,
                    judgeAgent_evaluate=judge_agent_evaluate)
+    return "error sentence"
