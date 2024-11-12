@@ -35,9 +35,13 @@ def generate_general_prompt(args):
     subtask_prompt_list = integrate_agent.get_sub_problems(integrate_agent_total_prompt,
                                                            integrate_agent_subtask_question)
     print("子任务已生成")
-    # 得到子问题的回复
-    subtask_answer_list = integrate_agent.get_sub_answers(subtask_prompt_list)
-    print("子回答已生成")
+
+    if args.input_mode == "short":
+        subtask_answer_list = subtask_prompt_list
+    else:
+        # 得到子问题的回复
+        subtask_answer_list = integrate_agent.get_sub_answers(subtask_prompt_list)
+        print("子回答已生成")
     general_prompt = get_general_message(integrate_agent_total_prompt,
                                          subtask_answer_list)
     logger.log(Description="sub task finished",
@@ -48,10 +52,10 @@ def generate_general_prompt(args):
                subtask_answer_list=subtask_answer_list,
                general_prompt=general_prompt
                )
-    return general_prompt,subtask_prompt_list
+    return general_prompt, subtask_prompt_list,integrate_agent_total_prompt
 
 
-def iterative_optimization(args, general_prompt,subtask_answer_list):
+def iterative_optimization(args, general_prompt, subtask_answer_list,general_background_prompt):
     target_agent, method_agent, judge_agent = load_optimize_agents(args)
 
     batch_size = args.n_streams
@@ -62,20 +66,22 @@ def iterative_optimization(args, general_prompt,subtask_answer_list):
     target_agent_conv_list = target_agent.get_conv_list(batch_size)
 
     # methodAgent和integrateAgent的Prompt
-    method_agent_processed_response_list = [method_agent.get_init_message(subtask_answer_list) for _ in range(batch_size)]
+    method_agent_processed_response_list = [method_agent.get_init_message(general_prompt,general_background_prompt) for _ in
+                                            range(batch_size)]
 
     method_agent_suggestion_list = []
     method_agent_pre_prompt = []
     method_agent_post_prompt = []
+    method_agent_improvement = []
     # 开始对话
     for iteration in range(1, args.n_iterations + 1):
         print(f"""\n{'=' * 36}\nIteration: {iteration}\n{'=' * 36}\n""")
         if iteration > 1:
             # 如果不是第一次输出，就采用process_suggestion为Agent提供建议
             method_agent_processed_response_list = [
-                method_agent.process_suggestion(Prepare_prompt, subtask_answer_list, Post_prompt, suggestion) for
-                Prepare_prompt, Post_prompt, suggestion in
-                zip(method_agent_pre_prompt, method_agent_post_prompt, method_agent_suggestion_list)]
+                method_agent.process_suggestion(Prepare_prompt, subtask_answer_list, Post_prompt, suggestion,target_response) for
+                Prepare_prompt, Post_prompt, suggestion,target_response in
+                zip(method_agent_pre_prompt, method_agent_post_prompt, method_agent_suggestion_list,target_response_list)]
 
         # 获得策略
         extracted_method_agent_list, method_agent_time = method_agent.get_response(method_agent_conv_list,
@@ -86,6 +92,7 @@ def iterative_optimization(args, general_prompt,subtask_answer_list):
         # 提取 methodAgent的改进prompt
         method_agent_pre_prompt = [attack["Prepare_prompt"] for attack in extracted_method_agent_list]
         method_agent_post_prompt = [attack["Post_prompt"] for attack in extracted_method_agent_list]
+        method_agent_improvement = [attack["improvement"] for attack in extracted_method_agent_list]
 
         # 得到综合后的结果
         review_agent_synthesize_list = [Prepare_prompt + general_prompt + Post_prompt for Prepare_prompt, Post_prompt in
@@ -107,6 +114,7 @@ def iterative_optimization(args, general_prompt,subtask_answer_list):
             if length >= args.target_length * 0.9:
                 print("找到了超长回复，退出")
                 logger.log(iteration=iteration,
+                           method_agent_improvement=method_agent_improvement,
                            method_agent_pre_prompt=method_agent_pre_prompt,
                            method_agent_post_prompt=method_agent_post_prompt,
                            reviewAgent_synthesize_list=review_agent_synthesize_list,
@@ -135,10 +143,11 @@ def iterative_optimization(args, general_prompt,subtask_answer_list):
             conv.messages = []
         for conv in judge_agent_conv_list:
             conv.messages = []
-        for conv in method_agent_conv_list:
-            conv.messages = []
+        # for conv in method_agent_conv_list:
+        #     conv.messages = []
 
         logger.log(iteration=iteration,
+                   method_agent_improvement=method_agent_improvement,
                    method_agent_pre_prompt=method_agent_pre_prompt,
                    method_agent_post_prompt=method_agent_post_prompt,
                    reviewAgent_synthesize_list=review_agent_synthesize_list,

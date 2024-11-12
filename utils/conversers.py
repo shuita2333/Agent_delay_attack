@@ -69,6 +69,10 @@ def get_model_path_and_template(model_name):
             "path": "gpt-4",
             "template": "gpt-4"
         },
+        "gpt-3.5": {
+            "path": "gpt-3.5-turbo",
+            "template": "gpt-3.5"
+        },
         "gpt-4o-mini": {
             "path": "gpt-4o-mini-2024-07-18",
             "template": "gpt-4"
