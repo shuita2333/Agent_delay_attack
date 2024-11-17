@@ -141,7 +141,8 @@ class GPT(LanguageModel):
                 time.sleep(self.API_RETRY_SLEEP)
 
             time.sleep(self.API_QUERY_SLEEP)
-        return json.dumps(response.to_dict()), sum_time
+        # return json.dumps(response.to_dict()), sum_time
+        return response.to_json(), sum_time
 
     def batched_generate(self,
                          conv_list: List[List[Dict]],

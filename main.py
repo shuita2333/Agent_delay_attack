@@ -78,6 +78,12 @@ if __name__ == '__main__':
         default=4096,
         help="目标输出长度."
     )
+    parser.add_argument(
+        "--target-mode",
+        type=str,
+        default="test",
+        help="用来区分迭代中的模拟目标和正式运行中的目标模型."
+    )
     ##################################################
 
     # ============== Judge model parameters =============

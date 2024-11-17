@@ -57,6 +57,7 @@ class BaseAgent(ABC):
         # 向对话添加提示和初始播种消息（仅一次）
         for conv, prompt in zip(conv_list, prompts_list):
             conv.append_message(conv.roles[0], prompt)
+            # Get prompts (需要根据模型修改)
             if "gpt" in self.model_name:
                 full_prompts.append(conv.to_openai_api_messages())
             else:

@@ -7,7 +7,7 @@ import time
 
 class TargetAgent(BaseAgent):
     def _get_system_message(self):
-        return get_target_agent_system_prompt(self.args.function_descript)
+        return get_target_agent_system_prompt(self.args)
 
     def _extract_json(self, s):
         # 解析整个返回值字符串为一个字典
