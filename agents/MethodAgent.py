@@ -23,7 +23,7 @@ class MethodAgent(BaseAgent):
         """
         json_str = json_str.replace("\n", "")
 
-        if not all(x in parsed for x in ["improvement","Prepare_prompt", "Post_prompt"]):
+        if not all(x in parsed for x in ["improvement", "Prepare_prompt", "Post_prompt"]):
             raise JSONDecodeError
         return parsed, json_str
 
@@ -31,19 +31,19 @@ class MethodAgent(BaseAgent):
         return get_method_agent_system_prompt()
 
     @staticmethod
-    def get_init_message(question,general_background_prompt):
-        return get_method_agent_init_message(question,general_background_prompt)
+    def get_init_message(question, general_background_prompt):
+        return get_method_agent_init_message(question, general_background_prompt)
 
     @staticmethod
-    def process_suggestion(pre_prompt, subtask_answer_list, post_prompt, suggestion,target_response):
+    def process_suggestion(pre_prompt, subtask_answer_list, post_prompt, suggestion, target_response):
         combined_msg = f""" **
 Your task is to improve the problem statement and require the target model to provide better answers. I will propose multiple sub questions in one context, and I hope the target model can provide detailed answers of over 1000 words for each sub question. You need to design more reasonable prompt statements to enhance the target model's understanding of the task, clearly expressing in the prompts that you seek answers of more than 1000 words for each sub question. Pay attention to clearly expressing the requirements of "each sub question" and "1000 words".
 For your previous generated content:\n
         """
-        if len(target_response) <=300:
-            combined_msg+=f"TARGET RESPONSE: {target_response}\n"
+        if len(target_response) <= 1500:
+            combined_msg += f"TARGET RESPONSE: {target_response}\n"
 
-        combined_msg+=f"""
+        combined_msg += f"""
 EVALUATION: {suggestion}
 ** Begin.  """
         return combined_msg
