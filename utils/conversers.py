@@ -20,7 +20,7 @@ def load_indiv_model(model_name):
     :return:
     """
     model_path, template = get_model_path_and_template(model_name)
-    if model_name in ["gpt-3.5-turbo", "gpt-4", "gpt-4o-mini"]:
+    if model_name in ["gpt-3.5-turbo", "gpt-4o", "gpt-4o-mini"]:
         lm = GPT(model_name)
     elif model_name in Siliconflow_model_list:
         lm = Siliconflow(model_path)
@@ -65,13 +65,17 @@ def get_model_path_and_template(model_name):
     :return:
     """
     full_model_dict = {
-        "gpt-4": {
-            "path": "gpt-4",
+        "gpt-4o": {
+            "path": "gpt-4o",
             "template": "gpt-4"
         },
         "gpt-3.5": {
             "path": "gpt-3.5-turbo",
             "template": "gpt-3.5"
+        },
+        "gpt-3.5-turbo": {
+            "path":"gpt-3.5-turbo",
+            "template":"gpt-3.5-turbo"
         },
         "gpt-4o-mini": {
             "path": "gpt-4o-mini-2024-07-18",
@@ -137,10 +141,6 @@ def get_model_path_and_template(model_name):
             "path": "ministral-8b-latest",
             "template": "mistral"
         },
-        # "gpt-3.5-turbo": {
-        #     "path":"gpt-3.5-turbo",
-        #     "template":"gpt-3.5-turbo"
-        # },
         # "vicuna":{
         #     "path":VICUNA_PATH,
         #     "template":"vicuna_v1.1"

@@ -93,7 +93,7 @@ class GPT(LanguageModel):
     API_ERROR_OUTPUT = "$ERROR$"
     API_QUERY_SLEEP = 0.5
     API_MAX_RETRY = 5
-    API_TIMEOUT = 100
+    API_TIMEOUT = 1000
     openai.api_key = OPENAI_API_KEY
 
     def generate(self, conv: List[Dict],
