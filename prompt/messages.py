@@ -66,3 +66,13 @@ def get_general_message(task, questions):
 
 
     return prompt
+
+
+def add_tool_answer(invoke_result,name):
+    prompt=f"""
+    You have already used the {name} and obtained the result: 
+    {invoke_result}
+    
+    Now please provide a response to the question:
+"""
+    return prompt
