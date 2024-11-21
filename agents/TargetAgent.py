@@ -29,6 +29,7 @@ class TargetAgent(BaseAgent):
             raise KeyError
         return {'content_str': content_str, 'content_length': content_length,'prompt_length': prompt_length}, None
 
+
     def _iterative_try_get_proper_format(self, conv_list, full_prompts, indices_to_regenerate):
         batch_size = len(conv_list)
         valid_outputs = [None] * batch_size
@@ -43,6 +44,7 @@ class TargetAgent(BaseAgent):
         if any([output for output in valid_outputs if output is None]):
             print(f"Failed to generate output after {self.max_n_attack_attempts} attempts. Terminating.")
         return valid_outputs, valid_times
+
 
     def _extract(self, nested_json):
         pass

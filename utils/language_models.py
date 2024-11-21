@@ -10,116 +10,34 @@ from typing import Dict, List
 from fastchat.conversation import Conversation
 from openai import OpenAI
 
-from API_key import Siliconflow_BASE_URL, Siliconflow_API_KEY, Mistral_API, Mistral_BASE_URL, OPENAI_API_KEY
+from API_key import Siliconflow_BASE_URL, Siliconflow_API_KEY, Mistral_API, Mistral_BASE_URL, OPENAI_API_KEY, \
+    ALIYUN_API_KEY, ALIYUN_BASE_URL
 
 
-# import google.generativeai as palm
-# from langchain.llms.base import LLM
-# from langchain_core.callbacks import CallbackManagerForLLMRun
-
-
-class LanguageModel:
-    def __init__(self, model_name):
-        self.model_name = model_name
-
-    def batched_generate(self, prompts_list: List, max_n_tokens: int, temperature: float):
-        """
-        Generates responses for a batch of prompts using a language model.
-        """
-        raise NotImplementedError
-
-
-# class HuggingFace(LanguageModel):
-#     def __init__(self,model_name, model, tokenizer):
-#         self.model_name = model_name
-#         self.model = model
-#         self.tokenizer = tokenizer
-#         self.eos_token_ids = [self.tokenizer.eos_token_id]
-#
-#     def batched_generate(self,
-#                         full_prompts_list,
-#                         max_n_tokens: int,
-#                         temperature: float,
-#                         top_p: float = 1.0,):
-#         inputs = self.tokenizer(full_prompts_list, return_tensors='pt', padding=True)
-#         inputs = {k: v.to(self.model.device.index) for k, v in inputs.items()}
-#
-#         # Batch generation
-#         if temperature > 0:
-#             output_ids = self.model.generate(
-#                 **inputs,
-#                 max_new_tokens=max_n_tokens,
-#                 do_sample=True,
-#                 temperature=temperature,
-#                 eos_token_id=self.eos_token_ids,
-#                 top_p=top_p,
-#             )
-#         else:
-#             output_ids = self.model.generate(
-#                 **inputs,
-#                 max_new_tokens=max_n_tokens,
-#                 do_sample=False,
-#                 eos_token_id=self.eos_token_ids,
-#                 top_p=1,
-#                 temperature=1, # To prevent warning messages
-#             )
-#
-#         # If the model is not an encoder-decoder type, slice off the input tokens
-#         if not self.model.config.is_encoder_decoder:
-#             output_ids = output_ids[:, inputs["input_ids"].shape[1]:]
-#
-#         # Batch decoding
-#         outputs_list = self.tokenizer.batch_decode(output_ids, skip_special_tokens=True)
-#
-#         for key in inputs:
-#             inputs[key].to('cpu')
-#         output_ids.to('cpu')
-#         del inputs, output_ids
-#         gc.collect()
-#         torch.cuda.empty_cache()
-#
-#         return outputs_list
-#
-#     def extend_eos_tokens(self):
-#         # Add closing braces for Vicuna/Llama eos when using attacker model
-#         self.eos_token_ids.extend([
-#             self.tokenizer.encode("}")[1],
-#             29913,
-#             9092,
-#             16675])
-
-class GPT(LanguageModel):
+class GPT:
     API_RETRY_SLEEP = 10
     API_ERROR_OUTPUT = "$ERROR$"
     API_QUERY_SLEEP = 0.5
     API_MAX_RETRY = 5
-    API_TIMEOUT = 1000
-    openai.api_key = OPENAI_API_KEY
+    API_TIMEOUT = 10000
 
-    def generate(self, conv: List[Dict],
+    def __init__(self, model_name):
+        self.model_name = model_name
+        self.client = OpenAI(api_key=OPENAI_API_KEY)
+        self.max_tokens = 16384
+
+    def generate(self, conv: Conversation,
                  max_n_tokens: int,
                  temperature: float,
                  top_p: float):
-        """
-        Args:
-            conv: List of dictionaries, OpenAI API format
-            max_n_tokens: int, max number of tokens to generate
-            temperature: float, temperature for sampling
-            top_p: float, top p for sampling
-        Returns:
-            str: generated response
-        """
-        output = self.API_ERROR_OUTPUT
         for _ in range(self.API_MAX_RETRY):
             try:
-                client = OpenAI(api_key=openai.api_key)
                 start_time = time.time()
-                response = client.chat.completions.create(
+                response = self.client.chat.completions.create(
                     model=self.model_name,
-                    messages=conv,
-                    max_tokens=max_n_tokens,
+                    messages=conv.to_openai_api_messages(),
+                    max_tokens=self.max_tokens,
                     temperature=temperature,
-                    top_p=top_p,
                     timeout=self.API_TIMEOUT
                 )
                 end_time = time.time()
@@ -139,9 +57,7 @@ class GPT(LanguageModel):
             except openai.OpenAIError as e:
                 print(f"An error occurred: {e}")
                 time.sleep(self.API_RETRY_SLEEP)
-
             time.sleep(self.API_QUERY_SLEEP)
-        # return json.dumps(response.to_dict()), sum_time
         return response.to_json(), sum_time
 
     def batched_generate(self,
@@ -151,11 +67,75 @@ class GPT(LanguageModel):
                          top_p: float = 1.0, ):
         texts = []
         times = []
+        output_content = []
         for conv in conv_list:
             text, sum_time = self.generate(conv, max_n_tokens, temperature, top_p)
             texts.append(text)
             times.append(float(sum_time))
         return texts, times
+
+class StreamGPT(GPT):
+    def __init__(self,model_name):
+        super().__init__(model_name)
+        self.client = OpenAI(api_key=ALIYUN_API_KEY, base_url=ALIYUN_BASE_URL)
+
+    def generate(self, conv: Conversation,
+                 max_n_tokens: int,
+                 temperature: float,
+                 top_p: float):
+        for _ in range(self.API_MAX_RETRY):
+            try:
+                full_content = ""  # 用来累积所有的 chunk 内容
+                content_length = 0  # 用来记录 total token 数
+                response = None  # 最终的完整 response 对象
+                start_time = time.time()
+                response_stream = self.client.chat.completions.create(
+                    model=self.model_name,
+                    messages=conv.to_openai_api_messages(),
+                    max_tokens=self.max_tokens,
+                    temperature=temperature,
+                    stream=True,
+                    stream_options={"include_usage": True}
+                )
+                # 遍历流式返回的 chunk
+                for chunk in response_stream:
+                    # 逐个解析 chunk，提取内容
+                    chunk_data = chunk.model_dump_json()  # 或者根据你的具体格式来解析
+                    chunk_json = json.loads(chunk_data)
+                    if chunk_json['choices'] is not None and len(chunk_json['choices'])>0 and chunk_json['choices'][0] is not None:
+                        full_content += chunk_json['choices'][0]['delta']['content']
+                    if chunk_json['usage'] is not None:
+                        completion_length = chunk_json['usage']['completion_tokens']
+                        prompt_length = chunk_json['usage']['prompt_tokens']
+                    # 构造最终的 response 对象，模拟你的原始结构
+                end_time = time.time()
+                response = {
+                    'choices': [{
+                        'message': {'content': full_content}
+                    }],
+                    'usage': {'completion_tokens': completion_length,
+                              'prompt_tokens': prompt_length
+                              }
+                }
+                sum_time = end_time - start_time
+                break
+            except openai.OpenAIError as e:
+                print(f"An error occurred: {e}")
+                time.sleep(self.API_RETRY_SLEEP)
+            time.sleep(self.API_QUERY_SLEEP)
+        return json.dumps(response), sum_time
+
+class Qwen(StreamGPT):
+    def __init__(self,model_name):
+        super().__init__(model_name)
+        self.model_name = model_name.lower()+"-instruct"
+        self.max_tokens = 8192
+
+class Llama(StreamGPT):
+    def __init__(self, model_name):
+        super().__init__(model_name)
+        self.model_name = "llama" + model_name.strip("Meta-Llama-").lower() + "-instruct"
+        self.max_tokens = 32000
 
 
 class Api(ABC):
