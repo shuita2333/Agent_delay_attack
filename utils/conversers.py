@@ -1,5 +1,5 @@
-from utils.config import Siliconflow_model_list, Mistral_model_list
-from utils.language_models import GPT, Siliconflow, Mistral
+from utils.config import Siliconflow_model_list, Mistral_model_list, GPT_model_list, Qwen_model_list, Llama_model_list
+from utils.language_models import GPT, Siliconflow, Mistral, Qwen, Llama
 from fastchat.model import get_conversation_template
 
 
@@ -20,8 +20,12 @@ def load_indiv_model(model_name):
     :return:
     """
     model_path, template = get_model_path_and_template(model_name)
-    if model_name in ["gpt-3.5-turbo", "gpt-4o", "gpt-4o-mini"]:
+    if model_name in GPT_model_list:
         lm = GPT(model_name)
+    elif model_name in Qwen_model_list:
+        lm = Qwen(model_name)
+    elif model_name in Llama_model_list:
+        lm = Llama(model_name)
     elif model_name in Siliconflow_model_list:
         lm = Siliconflow(model_path)
     elif model_name in Mistral_model_list:
@@ -65,6 +69,10 @@ def get_model_path_and_template(model_name):
     :return:
     """
     full_model_dict = {
+        "gpt-4": {
+            "path": "gpt-4",
+            "template": "gpt-4"
+        },
         "gpt-4o": {
             "path": "gpt-4o",
             "template": "gpt-4"
@@ -72,10 +80,6 @@ def get_model_path_and_template(model_name):
         "gpt-3.5": {
             "path": "gpt-3.5-turbo",
             "template": "gpt-3.5"
-        },
-        "gpt-3.5-turbo": {
-            "path":"gpt-3.5-turbo",
-            "template":"gpt-3.5-turbo"
         },
         "gpt-4o-mini": {
             "path": "gpt-4o-mini-2024-07-18",
@@ -141,6 +145,10 @@ def get_model_path_and_template(model_name):
             "path": "ministral-8b-latest",
             "template": "mistral"
         },
+        # "gpt-3.5-turbo": {
+        #     "path":"gpt-3.5-turbo",
+        #     "template":"gpt-3.5-turbo"
+        # },
         # "vicuna":{
         #     "path":VICUNA_PATH,
         #     "template":"vicuna_v1.1"
