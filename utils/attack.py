@@ -105,6 +105,7 @@ def iterative_optimization(args, general_prompt, subtask_answer_list,general_bac
 
         target_response_list = [target_information_list[i]['content_str'] for i in range(batch_size)]
         target_response_length = [target_information_list[i]['content_length'] for i in range(batch_size)]
+        attack_prompt_length = [target_information_list[i]['prompt_length'] for i in range(batch_size)]
 
         print(f"得到了Target agent的输出，当前输出结果长度为\n{target_response_length}")
 
@@ -120,6 +121,7 @@ def iterative_optimization(args, general_prompt, subtask_answer_list,general_bac
                            reviewAgent_synthesize_list=review_agent_synthesize_list,
                            target_response_list=target_response_list,
                            target_response_length=target_response_length,
+                           attack_prompt_length=attack_prompt_length,
                            target_success_agent=target_success_agent
                            )
                 return target_success_agent
