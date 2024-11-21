@@ -14,12 +14,13 @@ class TargetAgent(BaseAgent):
         response = json.loads(s)
         try:
             # 提取content字段中的嵌套JSON字符串
+            prompt_length = response['usage']['prompt_tokens']
             content_str = response['choices'][0]['message']['content']
             content_length = response['usage']['completion_tokens']
         except KeyError as e:
             print(f"KeyError! : {e}")
             raise KeyError
-        return {'content_str': content_str, 'content_length': content_length}, None
+        return {'content_str': content_str, 'content_length': content_length,'prompt_length': prompt_length}, None
 
     def _extract(self, nested_json):
         pass
