@@ -22,7 +22,7 @@ class JudgeAgent(BaseAgent):
         return parsed, json_str
 
     def _get_system_message(self):
-        return get_judge_agent_system_prompt()
+        return get_judge_agent_system_prompt(self.args)
 
     @staticmethod
     def judge_content(pre_prompt, question_prompt, post_prompt, answer):

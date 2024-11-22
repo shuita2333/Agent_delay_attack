@@ -66,7 +66,7 @@ def iterative_optimization(args, general_prompt, subtask_answer_list,general_bac
     target_agent_conv_list = target_agent.get_conv_list(batch_size)
 
     # methodAgent和integrateAgent的Prompt
-    method_agent_processed_response_list = [method_agent.get_init_message(general_prompt,general_background_prompt) for _ in
+    method_agent_processed_response_list = [method_agent.get_init_message(general_prompt,general_background_prompt,args) for _ in
                                             range(batch_size)]
 
     method_agent_suggestion_list = []

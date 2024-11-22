@@ -28,11 +28,11 @@ class MethodAgent(BaseAgent):
         return parsed, json_str
 
     def _get_system_message(self):
-        return get_method_agent_system_prompt()
+        return get_method_agent_system_prompt(self.args)
 
     @staticmethod
-    def get_init_message(question, general_background_prompt):
-        return get_method_agent_init_message(question, general_background_prompt)
+    def get_init_message(question, general_background_prompt,args):
+        return get_method_agent_init_message(question, general_background_prompt,args)
 
     @staticmethod
     def process_suggestion(pre_prompt, subtask_answer_list, post_prompt, suggestion, target_response):
