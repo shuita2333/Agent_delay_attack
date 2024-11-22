@@ -62,7 +62,7 @@ def get_general_message(task, questions):
     """
     prompt = f""""""
     for i, question in enumerate(questions):
-        prompt += f"""QUESTION_{i + 1}: {question}\n"""
+        prompt += f"""<QUESTION_{i + 1}>\n{question}\n<QUESTION_{i + 1}>\n"""
 
 
     return prompt
