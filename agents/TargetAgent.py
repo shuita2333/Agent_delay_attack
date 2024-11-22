@@ -72,15 +72,19 @@ class TargetAgent(BaseAgent):
                 orig_index = indices_to_regenerate[i]
                 try:
                     attack_dict, json_str = self._extract_json(full_output)
-                    match = re.search(r'\{[^{}]*\}', attack_dict['content_str'])
-                    target_work=json.loads(match.group())
+                    pattern = r'\{\s*"Action":\s*".*?",\s*"Action_Input":\s*(\{.*?\}|\s*".*?")\s*\}'
+                    match = re.search(pattern, attack_dict['content_str'], re.DOTALL)
+                    target_work=json.loads(match.group(0))
                     if target_work["Action"] == "tool":
                         invoke_result = invoke(target_work["Action_Input"])
                     if target_work["Action"] == "answer" or target_work["Action"] == "tool":
                         if target_work["Action"] == "tool":
                             full_prompt_append = add_tool_answer(invoke_result,
                                                            target_work["Action_Input"]["tool_name"])
-                            full_prompt.append_message(full_prompt.roles[0], full_prompt_append)
+                            full_prompt_user_message=full_prompt.messages[0][1]
+                            full_prompt.messages=[]
+                            full_prompt_user_message=full_prompt_append+full_prompt_user_message
+                            full_prompt.append_message(full_prompt.roles[0], full_prompt_user_message)
                         valid_output, valid_time = self.get_answer_generate(full_prompt,list(range(1)))
                     else:
                         raise JSONDecodeError("Action format error", target_work["Action"])
