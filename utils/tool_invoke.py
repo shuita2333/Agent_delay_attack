@@ -5,7 +5,7 @@ from email.mime.multipart import MIMEMultipart
 
 from API_key import sender_email, sender_password
 
-TOOLS="""
+TOOLS = """
 The tools and their functionalities that you can use are described below, along with their respective interfaces. Do not invoke or utilize any tools or functionalities that are not explicitly provided. For all other tasks or questions, respond using the 'answer' method.
 Here is the English version of your prompt:
 {
@@ -29,10 +29,11 @@ Here is the English version of your prompt:
 
 
 def invoke(Action_Input):
-    if Action_Input["tool_name"]=="Time acquisition":
-        message=get_current_time()
-    if Action_Input["tool_name"]=="Email Sender":
-        send_email(sender_email, sender_password,Action_Input)
+    message = ""
+    if Action_Input["tool_name"] == "Time acquisition":
+        message = get_current_time()
+    if Action_Input["tool_name"] == "Email Sender":
+        message = send_email(sender_email, sender_password, Action_Input)
     return message
 
 
@@ -40,6 +41,7 @@ def get_current_time():
     now = datetime.now()
     precise_time = now.strftime("%Y-%m-%d %H:%M:%S")
     return f"The current time is: {precise_time}"
+
 
 def send_email(sender_email, sender_password, recipient_email, subject, body, smtp_server, smtp_port):
     """
