@@ -1,6 +1,8 @@
-from utils.config import Siliconflow_model_list, Mistral_model_list, GPT_model_list, Qwen_model_list, Llama_model_list
-from utils.language_models import GPT, Siliconflow, Mistral, Qwen, Llama
 from fastchat.model import get_conversation_template
+
+from utils.config import Siliconflow_model_list, Mistral_model_list, GPT_model_list, Qwen_model_list, Llama_model_list, \
+    DeepSeek_model_list
+from utils.language_models import GPT, Siliconflow, Mistral, Qwen, Llama, DeepSeek
 
 
 class ModelNotFoundException(Exception):
@@ -26,6 +28,8 @@ def load_indiv_model(model_name):
         lm = Qwen(model_name)
     elif model_name in Llama_model_list:
         lm = Llama(model_name)
+    elif model_name in DeepSeek_model_list:
+        lm = DeepSeek(model_name)
     elif model_name in Siliconflow_model_list:
         lm = Siliconflow(model_path)
     elif model_name in Mistral_model_list:
@@ -131,11 +135,11 @@ def get_model_path_and_template(model_name):
         },
         "gemma-2-9b": {
             "path": "google/gemma-2-9b-it",
-            "template": "gemma2"
+            "template": "gpt-4"
         },
         "gemma-2-27b": {
             "path": "google/gemma-2-27b-it",
-            "template": "gemma2"
+            "template": "gpt-4"
         },
         "Ministral-3B": {
             "path": "ministral-3b-latest",
@@ -144,6 +148,10 @@ def get_model_path_and_template(model_name):
         "Ministral-8B": {
             "path": "ministral-8b-latest",
             "template": "mistral"
+        },
+        "vicuna": {
+            "path": "vicuna",
+            "template": "vicuna"
         },
         # "gpt-3.5-turbo": {
         #     "path":"gpt-3.5-turbo",
@@ -180,9 +188,4 @@ def conv_template(template_name):
     :param template_name:
     :return:
     """
-    template = get_conversation_template(template_name)
-    if template.name == 'llama-2':
-        template.sep2 = template.sep2.strip()
-    if template.name == 'one_shot':
-        template.messages.clear()
-    return template
+    return get_conversation_template(template_name)

@@ -23,8 +23,6 @@ class BaseAgent(ABC):
         self.top_p = top_p
         self.model, self.template = load_indiv_model(model_name)
         self.args = args
-        if "vicuna" in model_name or "llama" in model_name:
-            self.model.extend_eos_tokens()
 
     def get_conv_list(self, batch_size):
         conv_list = [conv_template(self.template) for _ in range(batch_size)]

@@ -11,7 +11,7 @@ from fastchat.conversation import Conversation
 from openai import OpenAI
 
 from API_key import Siliconflow_BASE_URL, Siliconflow_API_KEY, Mistral_API, Mistral_BASE_URL, OPENAI_API_KEY, \
-    ALIYUN_API_KEY, ALIYUN_BASE_URL
+    ALIYUN_API_KEY, ALIYUN_BASE_URL, DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL
 
 
 class GPT:
@@ -86,7 +86,6 @@ class StreamGPT(GPT):
         for _ in range(self.API_MAX_RETRY):
             try:
                 full_content = ""  # 用来累积所有的 chunk 内容
-                content_length = 0  # 用来记录 total token 数
                 response = None  # 最终的完整 response 对象
                 start_time = time.time()
                 response_stream = self.client.chat.completions.create(
@@ -138,8 +137,17 @@ class Llama(StreamGPT):
         self.max_tokens = 8192
 
 
-class Api(ABC):
+class DeepSeek(GPT):
+    def __init__(self, model_name):
+        super().__init__(model_name)
+        self.client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
+        self.model_name = "deepseek-chat"
+        self.max_tokens = 8192
+
+
+class Api:
     def __init__(self, api_key, base_url, model_name):
+        self.max_tokens = 4096
         self.api_key = api_key
         self.base_url = base_url
         self.model_name = model_name
@@ -185,31 +193,6 @@ class Api(ABC):
 
         return response.text, sum_time
 
-    def process_conv(self, conv: Conversation):
-        message = [{"role": "system",
-                    "content": conv.system_message}]
-        index = 0
-        roles = ["user", "assistant"]
-        for (r, m) in conv.messages:
-            message.append({"role": roles[index],
-                            "content": m})
-            index = (index + 1) % 2
-
-        return message
-
-    @abstractmethod
-    def completions(self, conv: Conversation,
-                    max_n_tokens: int,
-                    temperature: float,
-                    top_p: float):
-        pass
-
-
-class Siliconflow(Api):
-
-    def __init__(self, model_name):
-        super().__init__(Siliconflow_API_KEY, Siliconflow_BASE_URL, model_name)
-
     def completions(self,
                     conv: Conversation,
                     max_n_tokens: int,
@@ -225,9 +208,9 @@ class Siliconflow(Api):
         """
         payload = {
             "model": self.model_name,
-            "messages": self.process_conv(conv),
+            "messages": conv.to_openai_api_messages(),
             "stream": False,
-            "max_tokens": max_n_tokens,
+            "max_tokens": self.max_tokens,
             "temperature": temperature,
             "top_p": top_p,
         }
@@ -237,29 +220,20 @@ class Siliconflow(Api):
         }
 
         return payload, headers
+
+
+class Siliconflow(Api):
+
+    def __init__(self, model_name):
+        super().__init__(Siliconflow_API_KEY, Siliconflow_BASE_URL, model_name)
+        self.max_tokens = 3000
+
+
 
 
 class Mistral(Api):
 
     def __init__(self, model_name):
         super().__init__(Mistral_API, Mistral_BASE_URL, model_name)
+        self.max_tokens = 8192
 
-    def completions(self,
-                    conv: Conversation,
-                    max_n_tokens: int,
-                    temperature: float,
-                    top_p: float):
-        payload = {
-            "model": self.model_name,
-            "messages": self.process_conv(conv),
-            "stream": False,
-            "max_tokens": max_n_tokens,
-            "temperature": temperature,
-            "top_p": top_p,
-        }
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        }
-
-        return payload, headers
