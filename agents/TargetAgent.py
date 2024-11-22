@@ -52,7 +52,10 @@ class TargetAgent(BaseAgent):
     def Agent_work(self, full_prompt,indices_to_regenerate):
         agent_system_prompt = get_targetAgent_agent_system_prompt()
         Agent_prompt = copy.deepcopy(full_prompt)
-        Agent_prompt.append_message(Agent_prompt.roles[1],agent_system_prompt)
+        Agent_prompt_user_message=Agent_prompt.messages[0][1]
+        Agent_prompt.messages = []
+        Agent_prompt_user_message=agent_system_prompt+"\n\n"+Agent_prompt_user_message
+        Agent_prompt.append_message(Agent_prompt.roles[0],Agent_prompt_user_message)
         batch_size = 1
         valid_outputs = [None] * batch_size
         valid_times = [None] * batch_size
