@@ -112,7 +112,7 @@ def iterative_optimization(args, general_prompt, subtask_answer_list,general_bac
         # 早停准则
 
         for length, target_success_agent in zip(target_response_length, review_agent_synthesize_list):
-            if length >= args.target_length * 0.9:
+            if length >= args.target_length * 0.95:
                 print("找到了超长回复，退出")
                 logger.log(iteration=iteration,
                            method_agent_improvement=method_agent_improvement,

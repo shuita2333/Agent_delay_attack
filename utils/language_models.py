@@ -135,7 +135,7 @@ class Llama(StreamGPT):
     def __init__(self, model_name):
         super().__init__(model_name)
         self.model_name = "llama" + model_name.strip("Meta-Llama-").lower() + "-instruct"
-        self.max_tokens = 32000
+        self.max_tokens = 8192
 
 
 class Api(ABC):

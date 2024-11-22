@@ -1,9 +1,9 @@
 VICUNA_PATH = ""
 LLAMA_PATH = ""
-ATTACK_TEMP = 0
+ATTACK_TEMP = 0.5
 TARGET_TEMP = 0
-ATTACK_TOP_P = 0
-TARGET_TOP_P = 0
+ATTACK_TOP_P = 0.5
+TARGET_TOP_P = 0.01
 Siliconflow_model_list = [
     "DeepSeek-V2.5", "DeepSeek-V2",
     "gemma-2-9b", "gemma-2-27b"]
