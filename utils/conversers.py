@@ -149,6 +149,10 @@ def get_model_path_and_template(model_name):
             "path": "ministral-8b-latest",
             "template": "mistral"
         },
+        "open-mistral-7b": {
+            "path": "open-mistral-7b",
+            "template": "mistral"
+        },
         "vicuna": {
             "path": "vicuna",
             "template": "vicuna"
