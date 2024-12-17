@@ -17,10 +17,8 @@ class TargetAgent(BaseAgent):
         return get_target_agent_system_prompt(self.args)
 
     def _extract_json(self, s):
-        # 解析整个返回值字符串为一个字典
         response = json.loads(s)
         try:
-            # 提取content字段中的嵌套JSON字符串
             prompt_length = response['usage']['prompt_tokens']
             content_str = response['choices'][0]['message']['content']
             content_length = response['usage']['completion_tokens']
@@ -35,7 +33,6 @@ class TargetAgent(BaseAgent):
     #     valid_outputs = [None] * batch_size
     #     valid_times = [None] * batch_size
     #
-    #     # 基于索引重新生成会话子集
     #     full_prompts_subset = [full_prompts[i] for i in indices_to_regenerate]
     #
     #     for i, full_prompt in enumerate(full_prompts_subset):
@@ -60,13 +57,13 @@ class TargetAgent(BaseAgent):
     #     valid_outputs = [None] * batch_size
     #     valid_times = [None] * batch_size
     #     for attempt in range(self.max_n_attack_attempts):
-    #         # 生成输出
+    #         # Generate Output
     #         outputs_list, output_times = self.model.batched_generate([Agent_prompt],
     #                                                                  max_n_tokens=self.max_n_tokens,
     #                                                                  temperature=self.temperature,
     #                                                                  top_p=self.top_p
     #                                                                  )
-    #         # 检查有效的输出并更新列表
+    #         # Check for valid output and update the list
     #         new_indices_to_regenerate = []
     #         for i, full_output in enumerate(outputs_list):
     #             orig_index = indices_to_regenerate[i]
@@ -89,11 +86,11 @@ class TargetAgent(BaseAgent):
     #                 else:
     #                     raise JSONDecodeError("Action format error", target_work["Action"])
     #             except (JSONDecodeError, KeyError, TypeError) as e:
-    #                 # 如果出现异常，重新输出
+    #                 # If an exception occurs, re-output
     #                 traceback.print_exc()
-    #                 print(f"index 为{orig_index} 解析过程中出现了异常:{e}.正在重新生成。。。。。")
+    #                 print(f"index {orig_index} . An exception occurred during parsing: {e}. Regenerating...")
     #                 new_indices_to_regenerate.append(orig_index)
-    #         # 更新索引以为下一次迭代重新生成索引
+    #         # Update the index to regenerate the index for the next iteration
     #         indices_to_regenerate = new_indices_to_regenerate
     #         # If all outputs are valid, break
     #         if not indices_to_regenerate:
@@ -103,14 +100,14 @@ class TargetAgent(BaseAgent):
     # def get_answer_generate(self, Agent_prompt,indices_to_regenerate):
     #     global valid_time
     #     for attempt in range(self.max_n_attack_attempts):
-    #         # 生成输出
+    #         # Generate Output
     #         outputs_list, output_times = self.model.batched_generate([Agent_prompt],
     #                                                                  max_n_tokens=self.max_n_tokens,
     #                                                                  temperature=self.temperature,
     #                                                                  top_p=self.top_p
     #                                                                  )
     #
-    #         # 检查有效的输出并更新列表
+    #         # Check for valid output and update the list
     #         new_indices_to_regenerate = []
     #         for i, full_output in enumerate(outputs_list):
     #             orig_index = indices_to_regenerate[i]
@@ -119,12 +116,12 @@ class TargetAgent(BaseAgent):
     #                 valid_output = attack_dict
     #                 valid_time = output_times[i]
     #             except (JSONDecodeError, KeyError, TypeError) as e:
-    #                 # 如果出现异常，重新输出
+    #                 # If an exception occurs, re-output
     #                 traceback.print_exc()
-    #                 print(f"index 为{orig_index} 解析过程中出现了异常:{e}.正在重新生成。。。。。")
+    #                 print(f"index {orig_index} . An exception occurred during parsing: {e}. Regenerating...")
     #                 new_indices_to_regenerate.append(orig_index)
     #
-    #         # 更新索引以为下一次迭代重新生成索引
+    #         # Update the index to regenerate the index for the next iteration
     #         indices_to_regenerate = new_indices_to_regenerate
     #
     #         # If all outputs are valid, break

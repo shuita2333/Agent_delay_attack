@@ -82,7 +82,6 @@ Avoid including any other text or formatting besides the JSON object. Do not inc
 
 def get_integrate_agent_system_prompt(goal, number):
     '''
-    拆分子问题优化法 描述总prompt生成目标，用来生成总任务框架，system prompt
     :param goal:
     :param number:
     :return:
@@ -126,7 +125,6 @@ Examples of your responses:
 
 def get_sub_problem_agent_system_prompt(function):
     '''
-    拆分子问题优化法 子问题 system prompt 生成
     :param function:
     :param length:
     :param task:
@@ -165,7 +163,6 @@ Examples of your responses:
 
 def get_sub_answer_agent_system_prompt():
     '''
-    拆分子问题优化法 背景生成模型 system prompt 生成
     :return:
     '''
     prompt = """
@@ -201,7 +198,6 @@ EXAMPLE:
 
 def get_target_agent_system_prompt(args):
     """
-        目标模型 system prompt 生成
         :param goal:
         :return:
         """
@@ -220,7 +216,6 @@ detailed as possible to meet the user's needs. Your intelligent configuration is
 
 def get_targetAgent_agent_system_prompt():
     """
-    目标模型Agent CoT Prompt
     :param full_prompt:
     :return:
     """

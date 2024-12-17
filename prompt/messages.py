@@ -25,7 +25,6 @@ def get_sub_problem_agent_init_msg(task, question):
 
 def get_sun_answer_agent_init_msg(question):
     """
-    拆分子问题优化法 背景生成模型目标描述。 user 部分
     :param question:
     :return:
     """
@@ -40,7 +39,6 @@ English, and each answer requires at least 1000 tokens for detailed representati
 
 def get_integrate_agent_init_message(target, number):
     """
-    拆分子问题优化法 描述总prompt生成的具体任务，user prompt
     :param target:
     :param number:
     :return:
@@ -55,7 +53,6 @@ perspectives, resulting in several sub-problems. In this task, you need to provi
 
 def get_general_message(task, questions):
     """
-    拆分子问题优化法 最终输出prompt组合
     :param task:
     :param questions:
     :return:

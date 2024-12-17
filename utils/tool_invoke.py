@@ -45,34 +45,31 @@ def get_current_time():
 
 def send_email(sender_email, sender_password, recipient_email, subject, body, smtp_server, smtp_port):
     """
-    发送邮件的函数
-    参数:
-        sender_email (str): 发件人邮箱地址
-        sender_password (str): 发件人邮箱密码（或应用专用密码）
-        recipient_email (str): 收件人邮箱地址
-        subject (str): 邮件主题
-        body (str): 邮件正文内容
-        smtp_server (str): SMTP 服务器地址（例如 Gmail: 'smtp.gmail.com'）
-        smtp_port (int): SMTP 端口号（通常是 587）
+    Function for sending emails
+    Parameters:
+        sender_email (str): sender's email address
+        sender_password (str): sender's email password (or application-specific password)
+        recipient_email (str): recipient's email address
+        subject (str): email subject
+        body (str): email body
+        smtp_server (str): SMTP server address (e.g. Gmail: 'smtp.gmail.com')
+        smtp_port (int): SMTP port number (usually 587)
 
-    返回:
-        str: 成功或失败的信息
+    Returns:
+        str: success or failure information
     """
     try:
-        # 创建邮件对象
         message = MIMEMultipart()
         message['From'] = sender_email
         message['To'] = recipient_email
         message['Subject'] = subject
 
-        # 添加邮件正文
         message.attach(MIMEText(body, 'plain'))
 
-        # 连接到 SMTP 服务器
         with smtplib.SMTP(smtp_server, smtp_port) as server:
-            server.starttls()  # 启用 TLS 加密
-            server.login(sender_email, sender_password)  # 登录 SMTP 服务器
-            server.sendmail(sender_email, recipient_email, message.as_string())  # 发送邮件
+            server.starttls()
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, recipient_email, message.as_string())
 
         return "Email sent successfully!"
 

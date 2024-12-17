@@ -8,7 +8,6 @@ from prompt.system_prompts import get_sub_problem_agent_system_prompt, get_sub_a
 
 
 class IntegrateAgent(BaseAgent):
-    # 子问题agent
     class SubProblemAgent(BaseAgent):
 
         def __init__(self, model_name: str, max_n_tokens: int, max_n_attack_attempts: int, temperature: float,

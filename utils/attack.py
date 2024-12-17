@@ -5,7 +5,7 @@ from utils.loggers import AttackLogger
 logger = AttackLogger()
 
 
-def generate_general_prompt(args):
+def generate_Tree_prompt(args):
     logger.log(Description="Input parameter record",
                iteration='1',
                function_descript=args.function_descript,
@@ -19,40 +19,38 @@ def generate_general_prompt(args):
                n_question=args.n_question,
                )
 
-    integrate_agent = AgentFactory.get_factory('IntegrateAgent', args)
-    integrate_agent_init_message = integrate_agent.get_init_msg()
-    integrate_agent_conv_list = integrate_agent.get_conv_list(1)
+    extension_of_tree = AgentFactory.get_factory('IntegrateAgent', args)
+    integrate_agent_init_message = extension_of_tree.get_init_msg()
+    integrate_agent_conv_list = extension_of_tree.get_conv_list(1)
     integrate_agent_processed_response_list = [integrate_agent_init_message for _ in range(1)]
-    # 得到integrate_agent的结果
-    extracted_integrate_agent_list, integrate_agent_time = integrate_agent.get_response(integrate_agent_conv_list,
-                                                                                        integrate_agent_processed_response_list)
-    print("总任务框架已生成")
-    # 分离Json
-    integrate_agent_total_prompt = extracted_integrate_agent_list[0]["total_prompt"]
-    integrate_agent_subtask_question = extracted_integrate_agent_list[0]["subtask_question"]
 
-    # 生成子问题
-    subtask_prompt_list = integrate_agent.get_sub_problems(integrate_agent_total_prompt,
-                                                           integrate_agent_subtask_question)
-    print("子任务已生成")
+    extracted_integrate_agent_list, integrate_agent_time = extension_of_tree.get_response(integrate_agent_conv_list,
+                                                                                        integrate_agent_processed_response_list)
+    print("Deep Backtracking finish")
+    # Separate Json
+    total_prompt = extracted_integrate_agent_list[0]["total_prompt"]
+    Deep_Backtracking = extracted_integrate_agent_list[0]["subtask_question"]
+
+    Breadth_Expansion = extension_of_tree.get_sub_problems(total_prompt,
+                                                           Deep_Backtracking)
+    print("Breadth Expansion finish")
 
     if args.input_mode == "short":
-        subtask_answer_list = subtask_prompt_list
-    else:
-        # 得到子问题的回复
-        subtask_answer_list = integrate_agent.get_sub_answers(subtask_prompt_list)
-        print("子回答已生成")
-    general_prompt = get_general_message(integrate_agent_total_prompt,
+        subtask_answer_list = Breadth_Expansion
+    # else:
+    #     subtask_answer_list = extension_of_tree.get_sub_answers(Breadth_Expansion)
+    #     print("Minimum granularity expansion and refinement finish")
+    general_prompt = get_general_message(total_prompt,
                                          subtask_answer_list)
     logger.log(Description="sub task finished",
                iteration='1',
-               integerateAgent_total_prompt=integrate_agent_total_prompt,
-               integerateAgent_subtask_question=integrate_agent_subtask_question,
-               subtask_prompt_list=subtask_prompt_list,
+               integerateAgent_total_prompt=total_prompt,
+               integerateAgent_subtask_question=Deep_Backtracking,
+               subtask_prompt_list=Breadth_Expansion,
                subtask_answer_list=subtask_answer_list,
                general_prompt=general_prompt
                )
-    return general_prompt, subtask_prompt_list,integrate_agent_total_prompt
+    return general_prompt, Breadth_Expansion,total_prompt
 
 
 def iterative_optimization(args, general_prompt, subtask_answer_list,general_background_prompt):
@@ -60,12 +58,12 @@ def iterative_optimization(args, general_prompt, subtask_answer_list,general_bac
 
     batch_size = args.n_streams
 
-    # 不同Agent的对话模板
+    # Loading different dialog templates
     method_agent_conv_list = method_agent.get_conv_list(batch_size)
     judge_agent_conv_list = judge_agent.get_conv_list(batch_size)
     target_agent_conv_list = target_agent.get_conv_list(batch_size)
 
-    # methodAgent和integrateAgent的Prompt
+
     method_agent_processed_response_list = [method_agent.get_init_message(general_prompt,general_background_prompt,args) for _ in
                                             range(batch_size)]
 
@@ -73,33 +71,31 @@ def iterative_optimization(args, general_prompt, subtask_answer_list,general_bac
     method_agent_pre_prompt = []
     method_agent_post_prompt = []
     method_agent_improvement = []
-    # 开始对话
+
     for iteration in range(1, args.n_iterations + 1):
         print(f"""\n{'=' * 36}\nIteration: {iteration}\n{'=' * 36}\n""")
         if iteration > 1:
-            # 如果不是第一次输出，就采用process_suggestion为Agent提供建议
             method_agent_processed_response_list = [
                 method_agent.process_suggestion(Prepare_prompt, subtask_answer_list, Post_prompt, suggestion,target_response) for
                 Prepare_prompt, Post_prompt, suggestion,target_response in
                 zip(method_agent_pre_prompt, method_agent_post_prompt, method_agent_suggestion_list,target_response_list)]
 
-        # 获得策略
-        extracted_method_agent_list, method_agent_time = method_agent.get_response(method_agent_conv_list,
+        # get Assist Prompt
+        Assist_Prompt_list, method_agent_time = method_agent.get_response(method_agent_conv_list,
                                                                                    method_agent_processed_response_list)
 
-        print("得到了Method agent的策略")
+        print("Get Assist Prompt")
 
-        # 提取 methodAgent的改进prompt
-        method_agent_pre_prompt = [attack["Prepare_prompt"] for attack in extracted_method_agent_list]
-        method_agent_post_prompt = [attack["Post_prompt"] for attack in extracted_method_agent_list]
-        method_agent_improvement = [attack["improvement"] for attack in extracted_method_agent_list]
 
-        # 得到综合后的结果
+        method_agent_pre_prompt = [attack["Prepare_prompt"] for attack in Assist_Prompt_list]
+        method_agent_post_prompt = [attack["Post_prompt"] for attack in Assist_Prompt_list]
+        method_agent_improvement = [attack["improvement"] for attack in Assist_Prompt_list]
+
+
         review_agent_synthesize_list = [Prepare_prompt + general_prompt + Post_prompt for Prepare_prompt, Post_prompt in
                                         zip(method_agent_pre_prompt, method_agent_post_prompt)]
-        print("得到了Method agent的策略和Integrate Agent的内容综合后的结果")
 
-        # 获得目标响应
+        # get Target model response
         target_information_list, target_time = target_agent.get_response(target_agent_conv_list,
                                                                          review_agent_synthesize_list)
 
@@ -107,13 +103,12 @@ def iterative_optimization(args, general_prompt, subtask_answer_list,general_bac
         target_response_length = [target_information_list[i]['content_length'] for i in range(batch_size)]
         attack_prompt_length = [target_information_list[i]['prompt_length'] for i in range(batch_size)]
 
-        print(f"得到了Target agent的输出，当前输出结果长度为\n{target_response_length}")
+        print(f"get Target model response, the current output length is \n{target_response_length}")
 
-        # 早停准则
 
         for length, target_success_agent in zip(target_response_length, review_agent_synthesize_list):
             if length >= args.target_length * 0.95:
-                print("找到了超长回复，退出")
+                print("Found long reply, exiting")
                 logger.log(iteration=iteration,
                            method_agent_improvement=method_agent_improvement,
                            method_agent_pre_prompt=method_agent_pre_prompt,
@@ -126,21 +121,21 @@ def iterative_optimization(args, general_prompt, subtask_answer_list,general_bac
                            )
                 return target_success_agent
 
-        # 根据已有的信息，生成judgeAgent的prompt
+        # Generate judge prompt based on the existing information
         judged_content = [judge_agent.judge_content(method_agent_pre_prompt[i],
                                                     general_prompt,
                                                     method_agent_post_prompt[i],
                                                     target_response_list[i]) for i in range(batch_size)]
 
-        # 得到judgeAgent给出的建议
+
         extracted_judge_agent_list, judge_agent_time = judge_agent.get_response(judge_agent_conv_list, judged_content)
         judge_agent_evaluate = [attack["evaluate"] for attack in extracted_judge_agent_list]
 
-        print("得到judgeAgent给出的建议")
+        print("Generate judge prompt finish")
 
         method_agent_suggestion_list = judge_agent_evaluate
 
-        # 清除target_agent的历史记录
+
         for conv in target_agent_conv_list:
             conv.messages = []
         for conv in judge_agent_conv_list:

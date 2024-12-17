@@ -8,7 +8,7 @@ from prompt.system_prompts import get_method_agent_system_prompt
 class MethodAgent(BaseAgent):
 
     def _extract(self, nested_json):
-        # 提取improvement和prompt字段
+        # Extract the improvement and prompt fields
         parsed = {
             "improvement": nested_json["improvement"],
             "Prepare_prompt": nested_json["Prepare_prompt"],

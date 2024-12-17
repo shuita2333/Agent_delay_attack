@@ -6,7 +6,7 @@ from prompt.system_prompts import get_judge_agent_system_prompt
 
 class JudgeAgent(BaseAgent):
     def _extract(self, nested_json):
-        # 提取improvement和prompt字段
+        # Extract the improvement and prompt fields
         parsed = {
             "evaluate": nested_json["evaluate"]
         }

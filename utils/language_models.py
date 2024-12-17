@@ -85,8 +85,8 @@ class StreamGPT(GPT):
                  top_p: float):
         for _ in range(self.API_MAX_RETRY):
             try:
-                full_content = ""  # 用来累积所有的 chunk 内容
-                response = None  # 最终的完整 response 对象
+                full_content = ""
+                response = None
                 start_time = time.time()
                 response_stream = self.client.chat.completions.create(
                     model=self.model_name,
@@ -96,17 +96,14 @@ class StreamGPT(GPT):
                     stream=True,
                     stream_options={"include_usage": True}
                 )
-                # 遍历流式返回的 chunk
                 for chunk in response_stream:
-                    # 逐个解析 chunk，提取内容
-                    chunk_data = chunk.model_dump_json()  # 或者根据你的具体格式来解析
+                    chunk_data = chunk.model_dump_json()
                     chunk_json = json.loads(chunk_data)
                     if chunk_json['choices'] is not None and len(chunk_json['choices'])>0 and chunk_json['choices'][0] is not None:
                         full_content += chunk_json['choices'][0]['delta']['content']
                     if chunk_json['usage'] is not None:
                         completion_length = chunk_json['usage']['completion_tokens']
                         prompt_length = chunk_json['usage']['prompt_tokens']
-                    # 构造最终的 response 对象，模拟你的原始结构
                 end_time = time.time()
                 response = {
                     'choices': [{
@@ -158,7 +155,7 @@ class Api:
                          temperature: float,
                          top_p: float = 1.0, ):
         """
-        模型调用规范接口
+        Model Call Specification Interface
         :param conv_list:
         :param max_n_tokens:
         :param temperature:
@@ -199,7 +196,7 @@ class Api:
                     temperature: float,
                     top_p: float):
         """
-        api 调用指令
+        API call instructions
         :param prompt:
         :param max_n_tokens:
         :param temperature:

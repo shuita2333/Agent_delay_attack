@@ -12,12 +12,12 @@ class ModelNotFoundException(Exception):
         self.model_name = model_name
 
     def __str__(self):
-        return f"没有找到名为:{self.model_name}的模型"
+        return f"No model found named: {self.model_name}"
 
 
 def load_indiv_model(model_name):
     """
-    构造模型，定义模板名称
+    Construct the model and define the template name
     :param model_name:
     :return:
     """
@@ -68,22 +68,14 @@ def load_indiv_model(model_name):
 
 def get_model_path_and_template(model_name):
     """
-    定义模型路径
+    Define the model path
     :param model_name:
     :return:
     """
     full_model_dict = {
-        "gpt-4": {
-            "path": "gpt-4",
-            "template": "gpt-4"
-        },
         "gpt-4o": {
             "path": "gpt-4o",
             "template": "gpt-4"
-        },
-        "gpt-3.5": {
-            "path": "gpt-3.5-turbo",
-            "template": "gpt-3.5"
         },
         "gpt-4o-mini": {
             "path": "gpt-4o-mini-2024-07-18",
@@ -113,24 +105,12 @@ def get_model_path_and_template(model_name):
             "path": "deepseek-ai/DeepSeek-V2",
             "template": "DeepSeek-llm-chat"
         },
-        "Meta-Llama-3.1-405B": {
-            "path": "meta-llama/Meta-Llama-3.1-405B-Instruct",
-            "template": "llama-2"
-        },
         "Meta-Llama-3.1-70B": {
             "path": "meta-llama/Meta-Llama-3.1-70B-Instruct",
             "template": "llama-2"
         },
         "Meta-Llama-3.1-8B": {
             "path": "meta-llama/Meta-Llama-3.1-8B-Instruct",
-            "template": "llama-2"
-        },
-        "Meta-Llama-3-70B": {
-            "path": "meta-llama/Meta-Llama-3-70B-Instruct",
-            "template": "llama-2"
-        },
-        "Meta-Llama-3-8B": {
-            "path": "meta-llama/Meta-Llama-3-8B-Instruct",
             "template": "llama-2"
         },
         "gemma-2-9b": {
@@ -141,46 +121,10 @@ def get_model_path_and_template(model_name):
             "path": "google/gemma-2-27b-it",
             "template": "gpt-4"
         },
-        "Ministral-3B": {
-            "path": "ministral-3b-latest",
-            "template": "mistral"
-        },
         "Ministral-8B": {
             "path": "ministral-8b-latest",
             "template": "mistral"
-        },
-        "open-mistral-7b": {
-            "path": "open-mistral-7b",
-            "template": "mistral"
-        },
-        "vicuna": {
-            "path": "vicuna",
-            "template": "vicuna"
-        },
-        # "gpt-3.5-turbo": {
-        #     "path":"gpt-3.5-turbo",
-        #     "template":"gpt-3.5-turbo"
-        # },
-        # "vicuna":{
-        #     "path":VICUNA_PATH,
-        #     "template":"vicuna_v1.1"
-        # },
-        # "llama-2":{
-        #     "path":LLAMA_PATH,
-        #     "template":"llama-2"
-        # },
-        # "claude-instant-1":{
-        #     "path":"claude-instant-1",
-        #     "template":"claude-instant-1"
-        # },
-        # "claude-2":{
-        #     "path":"claude-2",
-        #     "template":"claude-2"
-        # },
-        # "palm-2":{
-        #     "path":"palm-2",
-        #     "template":"palm-2"
-        # }
+        }
     }
     path, template = full_model_dict[model_name]["path"], full_model_dict[model_name]["template"]
     return path, template
@@ -188,7 +132,7 @@ def get_model_path_and_template(model_name):
 
 def conv_template(template_name):
     """
-    获取对应的对话模板
+    Get the corresponding dialogue template
     :param template_name:
     :return:
     """
