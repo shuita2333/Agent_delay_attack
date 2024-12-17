@@ -89,7 +89,7 @@ def basic_test(args, data_config ):
     )
 
 
-def test_prompt_generate(args, parameter):
+def AutoDoS_generate(args, parameter):
     """
     Batch generate attack statements
     :param args:
@@ -134,7 +134,7 @@ if __name__ == '__main__':
 
     # If you want to quickly change the attack model and the number of attacks generated, you can modify the following entries
     # DataConfiguration([Attack model], [Simulation target in attack], [Test model], [Number of attacks generated], "subtask")
-    data_config = DataConfiguration("gpt-4o", "gpt-4o", "gpt-4o", 5, "subtask")
+    data_config = DataConfiguration("gpt-4o", "gpt-4o-mini", "gpt-4o-mini", 1, "subtask")
 
     #   Task Category [You can modify this selection to perform the task]
         #   "effect_test"       Test the actual effect of the attack
@@ -146,7 +146,7 @@ if __name__ == '__main__':
         target_mode = "train"
 
     parser = argparse.ArgumentParser()
-    output_len = 16363
+    output_len = 16384
 
     attack_model = data_config.attack1LM
     if task == "effect_test" :
@@ -221,12 +221,6 @@ if __name__ == '__main__':
             type=int,
             default=output_len,
             help="Maximum number of generated tokens for the target."
-        )
-        parser.add_argument(
-            "--target-length",
-            type=int,
-            default=output_len,
-            help="Maximum output length of the target LLM application."
         )
         parser.add_argument(
             "--target-mode",
@@ -309,4 +303,4 @@ if __name__ == '__main__':
     if task == "effect_test" :
         basic_test(parser.parse_args(), data_config)
     elif task == "prompt_generate":
-        test_prompt_generate(parser.parse_args(), test_prompt_generate_parameter)
+        AutoDoS_generate(parser.parse_args(), test_prompt_generate_parameter)

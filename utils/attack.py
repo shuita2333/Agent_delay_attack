@@ -68,9 +68,9 @@ def iterative_optimization(args, general_prompt, subtask_answer_list,general_bac
                                             range(batch_size)]
 
     method_agent_suggestion_list = []
-    method_agent_pre_prompt = []
-    method_agent_post_prompt = []
-    method_agent_improvement = []
+    Assist_Prompt_pre_prompt = []
+    Assist_Prompt_post_prompt = []
+    Assist_Prompt_improvement = []
 
     for iteration in range(1, args.n_iterations + 1):
         print(f"""\n{'=' * 36}\nIteration: {iteration}\n{'=' * 36}\n""")
@@ -78,7 +78,7 @@ def iterative_optimization(args, general_prompt, subtask_answer_list,general_bac
             method_agent_processed_response_list = [
                 method_agent.process_suggestion(Prepare_prompt, subtask_answer_list, Post_prompt, suggestion,target_response) for
                 Prepare_prompt, Post_prompt, suggestion,target_response in
-                zip(method_agent_pre_prompt, method_agent_post_prompt, method_agent_suggestion_list,target_response_list)]
+                zip(Assist_Prompt_pre_prompt, Assist_Prompt_post_prompt, method_agent_suggestion_list,target_response_list)]
 
         # get Assist Prompt
         Assist_Prompt_list, method_agent_time = method_agent.get_response(method_agent_conv_list,
@@ -87,13 +87,13 @@ def iterative_optimization(args, general_prompt, subtask_answer_list,general_bac
         print("Get Assist Prompt")
 
 
-        method_agent_pre_prompt = [attack["Prepare_prompt"] for attack in Assist_Prompt_list]
-        method_agent_post_prompt = [attack["Post_prompt"] for attack in Assist_Prompt_list]
-        method_agent_improvement = [attack["improvement"] for attack in Assist_Prompt_list]
+        Assist_Prompt_pre_prompt = [attack["Prepare_prompt"] for attack in Assist_Prompt_list]
+        Assist_Prompt_post_prompt = [attack["Post_prompt"] for attack in Assist_Prompt_list]
+        Assist_Prompt_improvement = [attack["improvement"] for attack in Assist_Prompt_list]
 
 
         review_agent_synthesize_list = [Prepare_prompt + general_prompt + Post_prompt for Prepare_prompt, Post_prompt in
-                                        zip(method_agent_pre_prompt, method_agent_post_prompt)]
+                                        zip(Assist_Prompt_pre_prompt, Assist_Prompt_post_prompt)]
 
         # get Target model response
         target_information_list, target_time = target_agent.get_response(target_agent_conv_list,
@@ -107,12 +107,12 @@ def iterative_optimization(args, general_prompt, subtask_answer_list,general_bac
 
 
         for length, target_success_agent in zip(target_response_length, review_agent_synthesize_list):
-            if length >= args.target_length * 0.95:
+            if length >= args.target_max_n_tokens * 0.95:
                 print("Found long reply, exiting")
                 logger.log(iteration=iteration,
-                           method_agent_improvement=method_agent_improvement,
-                           method_agent_pre_prompt=method_agent_pre_prompt,
-                           method_agent_post_prompt=method_agent_post_prompt,
+                           method_agent_improvement=Assist_Prompt_improvement,
+                           method_agent_pre_prompt=Assist_Prompt_pre_prompt,
+                           method_agent_post_prompt=Assist_Prompt_post_prompt,
                            reviewAgent_synthesize_list=review_agent_synthesize_list,
                            target_response_list=target_response_list,
                            target_response_length=target_response_length,
@@ -122,9 +122,9 @@ def iterative_optimization(args, general_prompt, subtask_answer_list,general_bac
                 return target_success_agent
 
         # Generate judge prompt based on the existing information
-        judged_content = [judge_agent.judge_content(method_agent_pre_prompt[i],
+        judged_content = [judge_agent.judge_content(Assist_Prompt_pre_prompt[i],
                                                     general_prompt,
-                                                    method_agent_post_prompt[i],
+                                                    Assist_Prompt_post_prompt[i],
                                                     target_response_list[i]) for i in range(batch_size)]
 
 
@@ -144,9 +144,9 @@ def iterative_optimization(args, general_prompt, subtask_answer_list,general_bac
         #     conv.messages = []
 
         logger.log(iteration=iteration,
-                   method_agent_improvement=method_agent_improvement,
-                   method_agent_pre_prompt=method_agent_pre_prompt,
-                   method_agent_post_prompt=method_agent_post_prompt,
+                   method_agent_improvement=Assist_Prompt_improvement,
+                   method_agent_pre_prompt=Assist_Prompt_pre_prompt,
+                   method_agent_post_prompt=Assist_Prompt_post_prompt,
                    reviewAgent_synthesize_list=review_agent_synthesize_list,
                    target_response_list=target_response_list,
                    target_response_length=target_response_length,
