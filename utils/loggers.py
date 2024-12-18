@@ -16,8 +16,7 @@ class AttackLogger:
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         log_filename = f'./log/{timestamp}.log'
 
-        os.makedirs('../log', exist_ok=True)
-
+        os.makedirs('./log', exist_ok=True)
         file_handler = logging.FileHandler(log_filename)
         file_handler.setFormatter(logging.Formatter("%(message)s"))
 

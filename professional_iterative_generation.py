@@ -17,7 +17,7 @@ class TargetLogger:
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         log_filename = f'./test_data/result/effect_test___{timestamp}.log'
 
-        os.makedirs('../test_data/result', exist_ok=True)
+        os.makedirs('./test_data/result', exist_ok=True)
 
         logger_name = f'target_logger_{timestamp}'
         self.logger = logging.getLogger(logger_name)

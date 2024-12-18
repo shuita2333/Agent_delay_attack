@@ -1,4 +1,4 @@
-from fastchat.model import get_conversation_template
+from fastchat.conversation import get_conv_template
 
 from utils.config import Siliconflow_model_list, Mistral_model_list, GPT_model_list, Qwen_model_list, Llama_model_list, \
     DeepSeek_model_list
@@ -75,35 +75,35 @@ def get_model_path_and_template(model_name):
     full_model_dict = {
         "gpt-4o": {
             "path": "gpt-4o",
-            "template": "gpt-4"
+            "template": "chatgpt"
         },
         "gpt-4o-mini": {
             "path": "gpt-4o-mini-2024-07-18",
-            "template": "gpt-4"
+            "template": "chatgpt"
         },
         "Qwen2.5-7B": {
             "path": "Qwen/Qwen2.5-7B-Instruct",
-            "template": "Qwen2"
+            "template": "qwen-7b-chat"
         },
         "Qwen2.5-14B": {
             "path": "Qwen/Qwen2.5-14B-Instruct",
-            "template": "Qwen2"
+            "template": "qwen-7b-chat"
         },
         "Qwen2.5-32B": {
             "path": "Qwen/Qwen2.5-32B-Instruct",
-            "template": "Qwen2"
+            "template": "qwen-7b-chat"
         },
         "Qwen2.5-72B": {
             "path": "Qwen/Qwen2.5-72B-Instruct",
-            "template": "Qwen2"
+            "template": "qwen-7b-chat"
         },
         "DeepSeek-V2.5": {
             "path": "deepseek-ai/DeepSeek-V2.5",
-            "template": "DeepSeek-llm-chat"
+            "template": "deepseek-chat"
         },
         "DeepSeek-V2": {
             "path": "deepseek-ai/DeepSeek-V2",
-            "template": "DeepSeek-llm-chat"
+            "template": "deepseek-chat"
         },
         "Meta-Llama-3.1-70B": {
             "path": "meta-llama/Meta-Llama-3.1-70B-Instruct",
@@ -115,15 +115,15 @@ def get_model_path_and_template(model_name):
         },
         "gemma-2-9b": {
             "path": "google/gemma-2-9b-it",
-            "template": "gpt-4"
+            "template": "chatgpt"
         },
         "gemma-2-27b": {
             "path": "google/gemma-2-27b-it",
-            "template": "gpt-4"
+            "template": "chatgpt"
         },
         "Ministral-8B": {
             "path": "ministral-8b-latest",
-            "template": "mistral"
+            "template": "chatgpt"
         }
     }
     path, template = full_model_dict[model_name]["path"], full_model_dict[model_name]["template"]
@@ -136,4 +136,4 @@ def conv_template(template_name):
     :param template_name:
     :return:
     """
-    return get_conversation_template(template_name)
+    return get_conv_template(template_name)
